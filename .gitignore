@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Miljövariabler
+.env
+.env.*
+!.env.example
+
+# Loggar
+logs/
+*.log
+npm-debug.log*
+
+# Testtäckning
+coverage/
+
+# PostgreSQL
+*.sql.gz
+*.dump
+*.backup
+pgdata/
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Build
+dist/
+build/
+
+# Agent
+.claude/
+
+# Documentation
+docs/
