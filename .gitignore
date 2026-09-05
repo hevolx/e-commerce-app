@@ -34,3 +34,4 @@ build/
 
 # Documentation
 docs/
+.neon
