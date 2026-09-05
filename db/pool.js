@@ -6,10 +6,9 @@ const pool = new Pool({
   host: DB.PGHOST,
   database: DB.PGDATABASE,
   password: DB.PGPASSWORD,
+  pgsslmode: DB.PGSSLMODE,
+  pgchannelbinding: DB.PGCHANNELBINDING,
   port: DB.PGPORT
 });
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  end: () => pool.end()
-}
+module.exports = pool;
