@@ -37,4 +37,24 @@ describe('POST /register', () => {
     expect(user.passwordhash).not.toBe(password);
     await expect(bcrypt.compare(password, user.passwordhash)).resolves.toBe(true);
   });
+
+  it('responds with 400 when email is missing', async () => {
+    const response = await request(app).post('/register').send({
+      password,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('responds with 400 when password is missing', async () => {
+    const response = await request(app).post('/register').send({
+      email: `missing.password.${Date.now()}@example.com`,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    });
+
+    expect(response.status).toBe(400);
+  });
 });
