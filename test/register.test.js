@@ -57,4 +57,15 @@ describe('POST /register', () => {
 
     expect(response.status).toBe(400);
   });
+
+  it('responds with 409 when the email is already registered', async () => {
+    const response = await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    });
+
+    expect(response.status).toBe(409);
+  });
 });

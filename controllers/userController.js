@@ -13,9 +13,15 @@ const createUser = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
     const results = await pool.query(
-      'INSERT INTO users (email, passwordHash, firstName, lastName, isActive) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      `INSERT INTO users (email, passwordHash, firstName, lastName, isActive)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (email) DO NOTHING
+      RETURNING *`,
       [email, passwordHash, firstName, lastName, true]
     );
+    if (results.rows[0] == null) {
+      res.status(409).send(`Email '${email}' already exist`);
+    }
     res.status(201).send(`User added with ID: ${results.rows[0].id}`);
   } catch (error) {
     throw error;
