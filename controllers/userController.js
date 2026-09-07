@@ -1,6 +1,9 @@
 const pool = require('../db/pool.js');
 const bcrypt = require('bcrypt');
-const SALT_ROUNDS = 12;
+
+const registerForm = async (req, res) => {
+  res.render('pages/register')
+}
 
 const createUser = async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -10,7 +13,7 @@ const createUser = async (req, res) => {
   }
 
   try {
-    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const passwordHash = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
 
     const results = await pool.query(
       `INSERT INTO users (email, passwordHash, firstName, lastName, isActive)
@@ -19,6 +22,7 @@ const createUser = async (req, res) => {
       RETURNING *`,
       [email, passwordHash, firstName, lastName, true]
     );
+
     if (results.rows[0] == null) {
       res.status(409).send(`Email '${email}' already exist`);
     }
@@ -29,5 +33,6 @@ const createUser = async (req, res) => {
 };
 
 module.exports = {
-  createUser
+  createUser,
+  registerForm
 };
