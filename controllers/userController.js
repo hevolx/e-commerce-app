@@ -6,9 +6,11 @@ const registerForm = async (req, res) => {
 }
 
 const createUser = async (req, res) => {
-  const { email, password, firstName, lastName } = req.body;
+  const { firstName, lastName } = req.body;
+  const email = typeof req.body.email === 'string' ? req.body.email.trim() : req.body.email;
+  const password = typeof req.body.password === 'string' ? req.body.password.trim() : req.body.password;
 
-  if (email == null || password == undefined) {
+  if (!email || !password) {
     return res.status(400).send('Fields marked with * is required');
   }
 

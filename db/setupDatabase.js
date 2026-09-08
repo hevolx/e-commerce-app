@@ -71,15 +71,15 @@ const { DB } = require('./config');
     );
   `
 
-  try {
-    const db = new Client({
-      user: DB.PGUSER,
-      host: DB.PGHOST,
-      database: DB.PGDATABASE,
-      password: DB.PGPASSWORD,
-      port: DB.PGPORT
-    });
+  const db = new Client({
+    user: DB.PGUSER,
+    host: DB.PGHOST,
+    database: DB.PGDATABASE,
+    password: DB.PGPASSWORD,
+    port: DB.PGPORT
+  });
 
+  try {
     await db.connect();
 
     // Create tables on database
@@ -90,9 +90,10 @@ const { DB } = require('./config');
     await db.query(cartsTable);
     await db.query(cartItemsTable);
 
-    await db.end();
-
   } catch (err) {
     console.log("ERROR CREATING ONE OR MORE TABLES: ", err);
+    process.exitCode = 1;
+  } finally {
+    await db.end();
   }
 })();
