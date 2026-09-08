@@ -24,7 +24,7 @@ const createUser = async (req, res) => {
     );
 
     if (results.rows[0] == null) {
-      res.status(409).send(`Email '${email}' already exist`);
+      return res.status(409).render('pages/register', { error: `Email '${email}' already exists.` });
     }
     res.status(201).send(`User added with ID: ${results.rows[0].id}`);
   } catch (error) {

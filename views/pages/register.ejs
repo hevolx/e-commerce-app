@@ -9,3 +9,9 @@
   <input type="text" id="lastname" name="lastName"><br>
   <input type="submit" value="Submit">
 </form>
+
+<% if (typeof error !=='undefined' && error) { %>
+  <p data-testid="register-error">
+    <%= error %>
+  </p>
+  <% } %>
