@@ -71,6 +71,19 @@ const { DB } = require('./config');
     );
   `
 
+  const sessionTable = `
+    CREATE TABLE IF NOT EXISTS session (
+      sid             VARCHAR       NOT NULL COLLATE "default",
+      sess            JSON          NOT NULL,
+      expire          TIMESTAMP(6)  NOT NULL,
+      CONSTRAINT session_pkey PRIMARY KEY (sid)
+    );
+  `
+
+  const sessionExpireIndex = `
+    CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON session (expire);
+  `
+
   const db = new Client({
     user: DB.PGUSER,
     host: DB.PGHOST,
@@ -89,7 +102,8 @@ const { DB } = require('./config');
     await db.query(orderItemsTable);
     await db.query(cartsTable);
     await db.query(cartItemsTable);
-
+    await db.query(sessionTable);
+    await db.query(sessionExpireIndex);
   } catch (err) {
     console.log("ERROR CREATING ONE OR MORE TABLES: ", err);
     process.exitCode = 1;
