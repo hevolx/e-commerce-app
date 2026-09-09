@@ -1,4 +1,4 @@
-const app = require('./app');
+const { app } = require('./app');
 
 const PORT = process.env.PGPORT || 3000;
 
