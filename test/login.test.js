@@ -1,10 +1,9 @@
 const request = require('supertest');
 const { app, sessionStore } = require('../app');
 const pool = require('../db/pool.js');
-const { verifyCredentials } = require('../auth/localStrategy');
 
-describe('verifyCredentials', () => {
-  const email = `strategy.user.${Date.now()}@example.com`;
+describe('POST /login', () => {
+  const email = `login.user.${Date.now()}@example.com`;
   const password = 'supersecret123';
 
   beforeAll(async () => {
@@ -22,14 +21,12 @@ describe('verifyCredentials', () => {
     await pool.end();
   });
 
-  it('passes the matching user to the callback for valid credentials', async () => {
-    const result = await new Promise((resolve, reject) => {
-      verifyCredentials(email, password, (err, user) => {
-        if (err) reject(err);
-        else resolve(user);
-      });
-    });
+  it('creates a session and responds with success when credentials are correct', async () => {
+    const response = await request(app).post('/login').send({ email, password });
 
-    expect(result).toMatchObject({ email });
+    expect(response.status).toBe(200);
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringMatching(/connect\.sid=/)])
+    );
   });
 });
