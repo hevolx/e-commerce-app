@@ -7,14 +7,14 @@ passport.use(
   new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
     try {
       const results = await pool.query(
-        `SELECT email, passwordhash
+        `SELECT email, passwordhash, isactive
       FROM users
       WHERE email = $1`,
         [email]
       );
 
-      // No account found
-      if (!results.rows[0]) return done(null, false)
+      // No account found or account inactive
+      if (!results.rows[0] || !results.rows[0].isactive) return done(null, false)
 
       // Password does match against hash
       else if (await bcrypt.compare(password, results.rows[0].passwordhash)) {
@@ -39,11 +39,15 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (email, done) => {
   try {
     const results = await pool.query(
-      `SELECT email, passwordhash
+      `SELECT email, passwordhash, isactive
       FROM users
       WHERE email = $1`,
       [email]
     );
+
+    // No account found or account inactive
+    if (!results.rows[0] || !results.rows[0].isactive) return done(null, false);
+
     done(null, results.rows[0]);
   } catch (error) {
     done(error);

@@ -5,6 +5,7 @@ const pool = require('../db/pool.js');
 describe('POST /login', () => {
   const email = `login.user.${Date.now()}@example.com`;
   const password = 'supersecret123';
+  let sessionId;
 
   beforeAll(async () => {
     await request(app).post('/register').send({
@@ -16,6 +17,11 @@ describe('POST /login', () => {
   });
 
   afterAll(async () => {
+    if (sessionId) {
+      await new Promise((resolve, reject) => {
+        sessionStore.destroy(sessionId, (error) => (error ? reject(error) : resolve()));
+      });
+    }
     await pool.query('DELETE FROM users WHERE email = $1', [email]);
     await sessionStore.close();
     await pool.end();
@@ -28,6 +34,10 @@ describe('POST /login', () => {
     expect(response.headers['set-cookie']).toEqual(
       expect.arrayContaining([expect.stringMatching(/connect\.sid=/)])
     );
+
+    const cookie = response.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+    const rawValue = decodeURIComponent(cookie.split(';')[0].split('=')[1]);
+    sessionId = rawValue.split('.')[0].slice(2);
   });
 
   it('responds with 401 and creates no session when the password is incorrect', async () => {

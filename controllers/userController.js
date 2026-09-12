@@ -47,8 +47,10 @@ const loginUser = async (req, res, next) => {
     if (err) { return next(err) }
     if (!user) { return res.status(401).render('pages/login', { error: `Credentials are invalid` }) }
     else {
-      req.logIn(user, () => {
-        res.sendStatus(200)
+
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        return res.sendStatus(200);
       })
     }
   })(req, res, next);
