@@ -3,10 +3,12 @@ const passport = require('passport');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
+// #region "Register route"
 router.post('/register', userController.createUser);
 router.get('/register', userController.registerForm);
+// #endregion
 
-// Login route
+// #region "Login route"
 router.post(
   '/login',
   passport.authenticate('local'),
@@ -14,5 +16,6 @@ router.post(
     res.sendStatus(200);
   }
 );
+// #endregion
 
 module.exports = router;

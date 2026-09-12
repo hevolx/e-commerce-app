@@ -13,7 +13,6 @@ const sessionStore = new pgSession({ pool: dbPool })
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
-
 app.use(session({
   store: sessionStore,
   secret: config.SESSION_SECRET,

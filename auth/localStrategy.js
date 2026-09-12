@@ -13,20 +13,20 @@ passport.use(
         [email]
       );
 
-      // Inget konto
+      // No account found
       if (!results.rows[0]) return done(null, false)
 
-      // Rätt lösenord
+      // Password does match against hash
       else if (await bcrypt.compare(password, results.rows[0].passwordhash)) {
         return done(null, results.rows[0]);
       }
 
-      // Fel lösenord
+      // Password does not match against hash
       else {
         return done(null, false)
       }
 
-      // Databasfel
+      // Database error
     } catch (error) {
       return done(error, false)
     }
