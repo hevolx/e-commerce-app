@@ -1,6 +1,8 @@
 const pool = require('../db/pool.js');
 const bcrypt = require('bcrypt');
+const passport = require('passport');
 
+// #region "Register"
 const registerForm = async (req, res) => {
   res.render('pages/register')
 }
@@ -33,8 +35,60 @@ const createUser = async (req, res) => {
     throw error;
   }
 };
+// #endregion
+
+// #region "Login"
+/** Renders the login form. */
+const loginForm = async (req, res) => {
+  res.render('pages/login')
+}
+
+/**
+ * Authenticates submitted credentials and starts a session for a valid user.
+ *
+ * Invalid credentials re-render the login form with a 401 status. Authentication
+ * and session errors are forwarded to the next Express error handler.
+ */
+const loginUser = async (req, res, next) => {
+  passport.authenticate('local', (err, user) => {
+    if (err) { return next(err) }
+    if (!user) { return res.status(401).render('pages/login', { error: `Credentials are invalid` }) }
+    else {
+
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        return res.sendStatus(200);
+      })
+    }
+  })(req, res, next);
+}
+// #endregion
+
+// #region "Logout"
+/**
+ * Deletes the current session from the persistent store and responds with 200.
+ *
+ * Database errors propagate from the request handler.
+ */
+const logoutUser = async (req, res, next) => {
+  const sid = req.sessionID;
+  try {
+    await pool.query(
+      `DELETE FROM session
+      WHERE sid = $1`,
+      [sid]
+    );
+    res.sendStatus(200);
+  } catch (error) {
+    throw error;
+  }
+}
+// #endregion
 
 module.exports = {
+  registerForm,
   createUser,
-  registerForm
+  loginForm,
+  loginUser,
+  logoutUser
 };

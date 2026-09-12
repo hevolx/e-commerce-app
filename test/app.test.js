@@ -1,7 +1,11 @@
 const request = require('supertest');
-const app = require('../app');
+const { app, sessionStore } = require('../app');
 
 describe('GET /', () => {
+  afterAll(async () => {
+    await sessionStore.close();
+  });
+
   it('responds with 200', async () => {
     const response = await request(app).get('/');
 

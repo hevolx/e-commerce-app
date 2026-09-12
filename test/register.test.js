@@ -1,6 +1,6 @@
 const request = require('supertest');
 const bcrypt = require('bcrypt');
-const app = require('../app');
+const { app, sessionStore } = require('../app');
 const pool = require('../db/pool.js');
 
 describe('POST /register', () => {
@@ -22,6 +22,7 @@ describe('POST /register', () => {
 
   afterAll(async () => {
     await pool.query('DELETE FROM users WHERE email = $1', [email]);
+    await sessionStore.close();
     await pool.end();
   });
 
