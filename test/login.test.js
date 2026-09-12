@@ -29,4 +29,11 @@ describe('POST /login', () => {
       expect.arrayContaining([expect.stringMatching(/connect\.sid=/)])
     );
   });
+
+  it('responds with 401 and creates no session when the password is incorrect', async () => {
+    const response = await request(app).post('/login').send({ email, password: 'wrongpassword' });
+
+    expect(response.status).toBe(401);
+    expect(response.headers['set-cookie']).toBeUndefined();
+  });
 });

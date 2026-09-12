@@ -8,11 +8,9 @@ describe('Session middleware', () => {
     await pool.end();
   });
 
-  it('issues a session cookie on a request', async () => {
+  it('does not issue a session cookie for an unauthenticated request', async () => {
     const response = await request(app).get('/');
 
-    expect(response.headers['set-cookie']).toEqual(
-      expect.arrayContaining([expect.stringMatching(/connect\.sid=/)])
-    );
+    expect(response.headers['set-cookie']).toBeUndefined();
   });
 });
