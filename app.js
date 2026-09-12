@@ -6,6 +6,7 @@ const dbPool = require('./db/pool');
 
 const passport = require('passport');
 require('./auth/localStrategy');
+require('./middleware/isAuthenticated');
 
 const userRoutes = require('./routes/userRoutes');
 
