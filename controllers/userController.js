@@ -45,7 +45,7 @@ const loginForm = async (req, res) => {
 const loginUser = async (req, res, next) => {
   passport.authenticate('local', (err, user) => {
     if (err) { return next(err) }
-    if (!user) { return res.sendStatus(401) }
+    if (!user) { return res.status(401).render('pages/login', { error: `Credentials are invalid` }) }
     else {
       req.logIn(user, () => {
         res.sendStatus(200)

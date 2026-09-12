@@ -5,3 +5,9 @@
   <input type="password" id="password" name="password" required><br><br>
   <input type="submit" value="Submit">
 </form>
+
+<% if (typeof error !=='undefined' && error) { %>
+  <p data-testid="login-error">
+    <%= error %>
+  </p>
+  <% } %>
