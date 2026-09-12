@@ -1,5 +1,6 @@
 const pool = require('../db/pool.js');
 const bcrypt = require('bcrypt');
+const passport = require('passport');
 
 // #region "Register"
 const registerForm = async (req, res) => {
@@ -40,6 +41,18 @@ const createUser = async (req, res) => {
 const loginForm = async (req, res) => {
   res.render('pages/login')
 }
+
+const loginUser = async (req, res, next) => {
+  passport.authenticate('local', (err, user) => {
+    if (err) { return next(err) }
+    if (!user) { return res.sendStatus(401) }
+    else {
+      req.logIn(user, () => {
+        res.sendStatus(200)
+      })
+    }
+  })(req, res, next);
+}
 // #endregion
 
 // #region "Logout"
@@ -62,5 +75,6 @@ module.exports = {
   registerForm,
   createUser,
   loginForm,
+  loginUser,
   logoutUser
 };
