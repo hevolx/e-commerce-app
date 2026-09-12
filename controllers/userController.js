@@ -38,10 +38,17 @@ const createUser = async (req, res) => {
 // #endregion
 
 // #region "Login"
+/** Renders the login form. */
 const loginForm = async (req, res) => {
   res.render('pages/login')
 }
 
+/**
+ * Authenticates submitted credentials and starts a session for a valid user.
+ *
+ * Invalid credentials re-render the login form with a 401 status. Authentication
+ * and session errors are forwarded to the next Express error handler.
+ */
 const loginUser = async (req, res, next) => {
   passport.authenticate('local', (err, user) => {
     if (err) { return next(err) }
@@ -58,6 +65,11 @@ const loginUser = async (req, res, next) => {
 // #endregion
 
 // #region "Logout"
+/**
+ * Deletes the current session from the persistent store and responds with 200.
+ *
+ * Database errors propagate from the request handler.
+ */
 const logoutUser = async (req, res, next) => {
   const sid = req.sessionID;
   try {
