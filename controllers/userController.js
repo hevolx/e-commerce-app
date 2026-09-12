@@ -1,6 +1,7 @@
 const pool = require('../db/pool.js');
 const bcrypt = require('bcrypt');
 
+// #region "Register"
 const registerForm = async (req, res) => {
   res.render('pages/register')
 }
@@ -33,7 +34,15 @@ const createUser = async (req, res) => {
     throw error;
   }
 };
+// #endregion
 
+// #region "Login"
+const loginForm = async (req, res) => {
+  res.render('pages/login')
+}
+// #endregion
+
+// #region "Logout"
 const logoutUser = async (req, res, next) => {
   const sid = req.sessionID;
   try {
@@ -47,9 +56,11 @@ const logoutUser = async (req, res, next) => {
     throw error;
   }
 }
+// #endregion
 
 module.exports = {
-  createUser,
   registerForm,
+  createUser,
+  loginForm,
   logoutUser
 };

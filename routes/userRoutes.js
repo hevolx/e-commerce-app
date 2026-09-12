@@ -20,6 +20,8 @@ router.post('/login', (req, res, next) => {
     }
   })(req, res, next);
 });
+
+router.get('/login', userController.loginForm);
 // #endregion
 
 // #region "Logout route"
