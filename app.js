@@ -42,7 +42,7 @@ app.use(
     store: sessionStore,
     secret: config.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: false
   })
 );
 

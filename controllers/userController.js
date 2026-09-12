@@ -34,7 +34,22 @@ const createUser = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res, next) => {
+  const sid = req.sessionID;
+  try {
+    await pool.query(
+      `DELETE FROM session
+      WHERE sid = $1`,
+      [sid]
+    );
+    res.sendStatus(200);
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   createUser,
-  registerForm
+  registerForm,
+  logoutUser
 };

@@ -22,4 +22,8 @@ router.post('/login', (req, res, next) => {
 });
 // #endregion
 
+// #region "Logout route"
+router.post('/logout', userController.logoutUser);
+// #endregion
+
 module.exports = router;
