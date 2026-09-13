@@ -17,18 +17,17 @@ const createUser = async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
+  const query = `
+    INSERT INTO users (email, passwordHash, firstName, lastName, isActive)
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (email) DO NOTHING
+    RETURNING *`;
 
-  const results = await pool.query(
-    `INSERT INTO users (email, passwordHash, firstName, lastName, isActive)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (email) DO NOTHING
-      RETURNING *`,
-    [email, passwordHash, firstName, lastName, true]
-  );
+  const { rows } = await pool.query(query, [email, passwordHash, firstName, lastName, true]);
 
-  if (results.rows[0] == null) {
+  if (rows[0] == null) {
     return res.status(409).render('pages/register', { error: `Email '${email}' already exists.` });
-  } else { res.status(201).send(`User added with ID: ${results.rows[0].id}`) };
+  } else { res.status(201).send(`User added with ID: ${rows[0].id}`) };
 };
 // #endregion
 
@@ -67,11 +66,11 @@ const loginUser = async (req, res, next) => {
  */
 const logoutUser = async (req, res, next) => {
   const sid = req.sessionID;
-  await pool.query(
-    `DELETE FROM session
-      WHERE sid = $1`,
-    [sid]
-  );
+  const query = `
+    DELETE FROM session
+    WHERE sid = $1`;
+
+  await pool.query(query, [sid]);
   res.sendStatus(200);
 }
 // #endregion
