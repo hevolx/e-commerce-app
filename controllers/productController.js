@@ -1,5 +1,14 @@
 const pool = require('../db/pool');
 
+const renderAllProducts = async (req, res) => {
+  const query = `
+    SELECT *
+    FROM products`;
+
+  const { rows } = await pool.query(query);
+  res.status(200).render('pages/home', { products: rows });
+}
+
 const retriveAllProducts = async (req, res) => {
   const query = `
     SELECT *
@@ -78,6 +87,7 @@ const deleteProduct = async (req, res) => {
 
 module.exports = {
   retriveAllProducts,
+  renderAllProducts,
   retriveProduct,
   createProduct,
   updateProduct,

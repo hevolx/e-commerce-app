@@ -57,11 +57,6 @@ app.use(require('./middleware/passportSession'));
 // #region "ROUTES"
 app.use('/', userRoutes);
 app.use('/', productRoutes);
-
-// Root route that returns a simple JSON status message
-app.get('/', (req, res) => {
-  res.status(200).json({ info: 'Node.js, Express, and Postgres API' });
-});
 // #endregion
 
 module.exports = { app, sessionStore };
