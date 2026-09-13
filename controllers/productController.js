@@ -62,9 +62,24 @@ const updateProduct = async (req, res) => {
   }
 }
 
+const deleteProduct = async (req, res) => {
+  const isAdmin = req.user.isadmin;
+  const productId = req.params.id;
+
+  const query = `
+    DELETE FROM products
+    WHERE id = $1`;
+
+  if (isAdmin == true) {
+    await pool.query(query, [productId]);
+    res.sendStatus(200);
+  }
+}
+
 module.exports = {
   retriveAllProducts,
   retriveProduct,
   createProduct,
-  updateProduct
+  updateProduct,
+  deleteProduct
 };

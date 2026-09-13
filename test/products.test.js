@@ -179,3 +179,47 @@ describe('PUT /products/:id', () => {
     );
   });
 });
+
+describe('DELETE /products/:id', () => {
+  const email = `admin.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+  let productId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    });
+    await pool.query('UPDATE users SET isAdmin = true WHERE email = $1', [email]);
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+
+    const result = await pool.query(
+      `INSERT INTO products (name, price, description)
+      VALUES ($1, $2, $3)
+      RETURNING id`,
+      ['Product To Delete', 9.99, 'A product used for testing']
+    );
+    productId = result.rows[0].id;
+  });
+
+  afterAll(async () => {
+    await pool.query('DELETE FROM products WHERE id = $1', [productId]);
+    await pool.query('DELETE FROM users WHERE email = $1', [email]);
+  });
+
+  it('deletes an existing product', async () => {
+    const response = await request(app)
+      .delete(`/products/${productId}`)
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+
+    const result = await pool.query('SELECT * FROM products WHERE id = $1', [productId]);
+    expect(result.rows).toHaveLength(0);
+  });
+});
