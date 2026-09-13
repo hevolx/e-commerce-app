@@ -9,6 +9,19 @@ const renderAllProducts = async (req, res) => {
   res.status(200).render('pages/home', { products: rows });
 }
 
+const renderProduct = async (req, res) => {
+  const productId = req.params.id;
+  const query = `
+    SELECT *
+    FROM products
+    WHERE id = $1`;
+
+  const { rows } = await pool.query(query, [productId]);
+  if (rows[0] == null) {
+    return res.sendStatus(404);
+  } else { res.status(200).render('pages/product', { products: rows }) }
+}
+
 const retriveAllProducts = async (req, res) => {
   const query = `
     SELECT *
@@ -86,8 +99,9 @@ const deleteProduct = async (req, res) => {
 }
 
 module.exports = {
-  retriveAllProducts,
   renderAllProducts,
+  renderProduct,
+  retriveAllProducts,
   retriveProduct,
   createProduct,
   updateProduct,
