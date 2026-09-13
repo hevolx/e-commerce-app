@@ -38,6 +38,8 @@ const createProduct = async (req, res) => {
     if (results.rows[0] == null) {
       return res.sendStatus(409);
     } else { res.status(201).json({ id: results.rows[0].id, name: results.rows[0].name }) };
+  } else {
+    return res.sendStatus(403);
   }
 }
 

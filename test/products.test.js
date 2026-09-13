@@ -106,4 +106,31 @@ describe('POST /products', () => {
     );
     createdProductId = response.body.id;
   });
+
+  it('returns 403 when the caller is not an admin', async () => {
+    const nonAdminEmail = `regular.user.${Date.now()}@example.com`;
+    const nonAdminPassword = 'supersecret123';
+
+    await request(app).post('/register').send({
+      email: nonAdminEmail,
+      password: nonAdminPassword,
+      firstName: 'Grace',
+      lastName: 'Hopper',
+    });
+    const loginResponse = await request(app)
+      .post('/login')
+      .send({ email: nonAdminEmail, password: nonAdminPassword });
+    const nonAdminCookie = loginResponse.headers['set-cookie'].find((c) =>
+      c.startsWith('connect.sid=')
+    );
+
+    const response = await request(app)
+      .post('/products')
+      .set('Cookie', nonAdminCookie)
+      .send({ name: 'Unauthorized Product', price: 9.99, description: 'Should not be created' });
+
+    expect(response.status).toBe(403);
+
+    await pool.query('DELETE FROM users WHERE email = $1', [nonAdminEmail]);
+  });
 });
