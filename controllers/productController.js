@@ -95,6 +95,8 @@ const deleteProduct = async (req, res) => {
   if (isAdmin == true) {
     await pool.query(query, [productId]);
     res.sendStatus(200);
+  } else {
+    return res.sendStatus(403);
   }
 }
 
