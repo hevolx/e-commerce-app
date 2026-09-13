@@ -4,11 +4,11 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const dbPool = require('./db/pool');
 
-const passport = require('passport');
 require('./auth/localStrategy');
 require('./middleware/isAuthenticated');
 
 const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 
 // #region "GENERAL SETUP"
@@ -51,18 +51,12 @@ app.use(
   })
 );
 
-// Middleware that initializes Passport and hooks it into the existing session
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(require('./middleware/passportSession'));
 // #endregion
 
 // #region "ROUTES"
 app.use('/', userRoutes);
-
-// Root route that returns a simple JSON status message
-app.get('/', (req, res) => {
-  res.status(200).json({ info: 'Node.js, Express, and Postgres API' });
-});
+app.use('/', productRoutes);
 // #endregion
 
 module.exports = { app, sessionStore };

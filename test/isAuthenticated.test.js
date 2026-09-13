@@ -11,4 +11,15 @@ describe('isAuthenticated middleware', () => {
     expect(res.sendStatus).toHaveBeenCalledWith(401);
     expect(next).not.toHaveBeenCalled();
   });
+
+  it('calls next and does not respond when there is a session', () => {
+    const req = { isAuthenticated: () => true };
+    const res = { sendStatus: jest.fn() };
+    const next = jest.fn();
+
+    isAuthenticated(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(res.sendStatus).not.toHaveBeenCalled();
+  });
 });

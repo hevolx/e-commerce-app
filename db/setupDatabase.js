@@ -10,6 +10,7 @@ const { DB } = require('./config');
       firstName       VARCHAR(50)    NOT NULL,
       lastName        VARCHAR(50)    NOT NULL,
       isActive        BOOLEAN        NOT NULL,
+      isAdmin         BOOLEAN        NOT NULL DEFAULT false,
       created         TIMESTAMP NOT NULL DEFAULT NOW(),
       modified        TIMESTAMP NOT NULL DEFAULT NOW()
     );
