@@ -28,8 +28,7 @@ const createUser = async (req, res) => {
 
   if (results.rows[0] == null) {
     return res.status(409).render('pages/register', { error: `Email '${email}' already exists.` });
-  }
-  res.status(201).send(`User added with ID: ${results.rows[0].id}`);
+  } else { res.status(201).send(`User added with ID: ${results.rows[0].id}`) };
 };
 // #endregion
 

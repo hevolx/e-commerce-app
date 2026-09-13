@@ -58,4 +58,12 @@ describe('GET /products/:id', () => {
       expect.objectContaining({ id: productId, name: 'Test Product' })
     );
   });
+
+  it('returns 404 when the product does not exist', async () => {
+    const nonExistentId = productId + 1000000;
+
+    const response = await request(app).get(`/products/${nonExistentId}`);
+
+    expect(response.status).toBe(404);
+  });
 });
