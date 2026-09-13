@@ -67,3 +67,43 @@ describe('GET /products/:id', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('POST /products', () => {
+  const email = `admin.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+  let createdProductId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    });
+    await pool.query('UPDATE users SET isAdmin = true WHERE email = $1', [email]);
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+  });
+
+  afterAll(async () => {
+    if (createdProductId) {
+      await pool.query('DELETE FROM products WHERE id = $1', [createdProductId]);
+    }
+    await pool.query('DELETE FROM users WHERE email = $1', [email]);
+  });
+
+  it('creates a new product', async () => {
+    const response = await request(app)
+      .post('/products')
+      .set('Cookie', cookie)
+      .send({ name: 'New Product', price: 19.99, description: 'A brand new product' });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual(
+      expect.objectContaining({ name: 'New Product' })
+    );
+    createdProductId = response.body.id;
+  });
+});

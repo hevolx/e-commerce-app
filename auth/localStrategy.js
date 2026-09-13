@@ -39,7 +39,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (email, done) => {
   try {
     const results = await pool.query(
-      `SELECT email, passwordhash, isactive
+      `SELECT email, passwordhash, isactive, isadmin
       FROM users
       WHERE email = $1`,
       [email]
@@ -47,8 +47,7 @@ passport.deserializeUser(async (email, done) => {
 
     // No account found or account inactive
     if (!results.rows[0] || !results.rows[0].isactive) return done(null, false);
-
-    done(null, results.rows[0]);
+    else { done(null, results.rows[0]) }
   } catch (error) {
     done(error);
   }

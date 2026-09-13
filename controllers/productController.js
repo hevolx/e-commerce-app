@@ -23,7 +23,26 @@ const getSpecificProduct = async (req, res) => {
   } else { res.status(200).json({ id: results.rows[0].id, name: results.rows[0].name }) }
 }
 
+const createProduct = async (req, res) => {
+  const isAdmin = req.user.isadmin;
+  const { name, price, description } = req.body;
+
+  if (isAdmin == true) {
+    const results = await pool.query(
+      `INSERT INTO products (name, price, description)
+      VALUES ($1, $2, $3)
+      RETURNING *`,
+      [name, price, description]
+    );
+
+    if (results.rows[0] == null) {
+      return res.sendStatus(409);
+    } else { res.status(201).json({ id: results.rows[0].id, name: results.rows[0].name }) };
+  }
+}
+
 module.exports = {
   getProducts,
-  getSpecificProduct
+  getSpecificProduct,
+  createProduct
 };
