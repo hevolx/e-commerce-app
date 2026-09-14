@@ -17,5 +17,6 @@ router.post('/logout', userController.logoutUser);
 // #endregion
 
 router.get('/users', userController.retriveAllUsers);
+router.get('/users/:id', userController.retriveUser);
 
 module.exports = router;

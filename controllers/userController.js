@@ -84,11 +84,25 @@ const retriveAllUsers = async (req, res) => {
   res.status(200).json(rows);
 }
 
+const retriveUser = async (req, res) => {
+  const userId = req.params.id;
+  const query = `
+    SELECT *
+    FROM users
+    WHERE id = $1`;
+
+  const { rows } = await pool.query(query, [userId]);
+  if (rows[0] == null) {
+    return res.sendStatus(404);
+  } else { res.status(200).json({ id: rows[0].id, email: rows[0].email }) }
+}
+
 module.exports = {
   renderRegisterForm,
   createUser,
   renderLoginForm,
   loginUser,
   logoutUser,
-  retriveAllUsers
+  retriveAllUsers,
+  retriveUser
 };
