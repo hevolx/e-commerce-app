@@ -105,6 +105,23 @@ const retriveUser = async (req, res) => {
   res.status(200).json({ id: rows[0].id, email: rows[0].email });
 }
 
+const updateUser = async (req, res) => {
+  const userId = req.user.id;
+  const { firstName } = req.body;
+
+  const query = `
+    UPDATE users
+    SET firstName = $2
+    WHERE id = $1
+    RETURNING *`;
+
+  const { rows } = await pool.query(query, [userId, firstName]);
+
+  if (rows[0] == null) {
+    return res.sendStatus(404);
+  } else { res.status(200).json({ id: rows[0].id, firstName: rows[0].firstname }) }
+}
+
 module.exports = {
   renderRegisterForm,
   createUser,
@@ -112,5 +129,6 @@ module.exports = {
   loginUser,
   logoutUser,
   retriveAllUsers,
-  retriveUser
+  retriveUser,
+  updateUser
 };

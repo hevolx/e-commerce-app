@@ -19,4 +19,6 @@ router.post('/logout', userController.logoutUser);
 router.get('/users', userController.retriveAllUsers);
 router.get('/users/:id', userController.retriveUser);
 
+router.put('/users/:id', userController.updateUser);
+
 module.exports = router;
