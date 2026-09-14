@@ -85,16 +85,24 @@ const retriveAllUsers = async (req, res) => {
 }
 
 const retriveUser = async (req, res) => {
-  const userId = req.params.id;
+  const requestedId = req.params.id;
+  const isOwnProfile = requestedId == req.user.id;
+  const isAdmin = req.user.isadmin;
+
+  if (!isOwnProfile && !isAdmin) {
+    return res.sendStatus(403);
+  }
+
   const query = `
     SELECT *
     FROM users
     WHERE id = $1`;
+  const { rows } = await pool.query(query, [requestedId]);
 
-  const { rows } = await pool.query(query, [userId]);
   if (rows[0] == null) {
     return res.sendStatus(404);
-  } else { res.status(200).json({ id: rows[0].id, email: rows[0].email }) }
+  }
+  res.status(200).json({ id: rows[0].id, email: rows[0].email });
 }
 
 module.exports = {

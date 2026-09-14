@@ -71,4 +71,28 @@ describe('GET /users/:id', () => {
       expect.objectContaining({ id: userId, email })
     );
   });
+
+  it("returns 403 when the caller requests another user's profile without admin rights", async () => {
+    const otherEmail = `other.user.${Date.now()}@example.com`;
+    const otherPassword = 'supersecret123';
+
+    await request(app).post('/register').send({
+      email: otherEmail,
+      password: otherPassword,
+      firstName: 'Katherine',
+      lastName: 'Johnson',
+    });
+    const otherLoginResponse = await request(app)
+      .post('/login')
+      .send({ email: otherEmail, password: otherPassword });
+    const otherCookie = otherLoginResponse.headers['set-cookie'].find((c) =>
+      c.startsWith('connect.sid=')
+    );
+
+    const response = await request(app).get(`/users/${userId}`).set('Cookie', otherCookie);
+
+    expect(response.status).toBe(403);
+
+    await pool.query('DELETE FROM users WHERE email = $1', [otherEmail]);
+  });
 });
