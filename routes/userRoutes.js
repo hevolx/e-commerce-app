@@ -4,16 +4,18 @@ const userController = require('../controllers/userController');
 
 // #region "Register route"
 router.post('/register', userController.createUser);
-router.get('/register', userController.registerForm);
+router.get('/register', userController.renderRegisterForm);
 // #endregion
 
 // #region "Login route"
 router.post('/login', userController.loginUser);
-router.get('/login', userController.loginForm);
+router.get('/login', userController.renderLoginForm);
 // #endregion
 
 // #region "Logout route"
 router.post('/logout', userController.logoutUser);
 // #endregion
+
+router.get('/users', userController.retriveAllUsers);
 
 module.exports = router;

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 
 // #region "Register"
-const registerForm = async (req, res) => {
+const renderRegisterForm = async (req, res) => {
   res.render('pages/register')
 }
 
@@ -33,7 +33,7 @@ const createUser = async (req, res) => {
 
 // #region "Login"
 /** Renders the login form. */
-const loginForm = async (req, res) => {
+const renderLoginForm = async (req, res) => {
   res.render('pages/login')
 }
 
@@ -75,10 +75,20 @@ const logoutUser = async (req, res, next) => {
 }
 // #endregion
 
+const retriveAllUsers = async (req, res) => {
+  const query = `
+    SELECT *
+    FROM users`;
+
+  const { rows } = await pool.query(query);
+  res.status(200).json(rows);
+}
+
 module.exports = {
-  registerForm,
+  renderRegisterForm,
   createUser,
-  loginForm,
+  renderLoginForm,
   loginUser,
-  logoutUser
+  logoutUser,
+  retriveAllUsers
 };
