@@ -133,4 +133,31 @@ describe('PUT /users/:id', () => {
       expect.objectContaining({ id: userId, firstName: 'Katherine' })
     );
   });
+
+  it("returns 403 when the caller tries to update another user's profile", async () => {
+    const otherEmail = `other.update.${Date.now()}@example.com`;
+    const otherPassword = 'supersecret123';
+
+    await request(app).post('/register').send({
+      email: otherEmail,
+      password: otherPassword,
+      firstName: 'Dorothy',
+      lastName: 'Vaughan',
+    });
+    const otherLoginResponse = await request(app)
+      .post('/login')
+      .send({ email: otherEmail, password: otherPassword });
+    const otherCookie = otherLoginResponse.headers['set-cookie'].find((c) =>
+      c.startsWith('connect.sid=')
+    );
+
+    const response = await request(app)
+      .put(`/users/${userId}`)
+      .set('Cookie', otherCookie)
+      .send({ firstName: 'Hijacked' });
+
+    expect(response.status).toBe(403);
+
+    await pool.query('DELETE FROM users WHERE email = $1', [otherEmail]);
+  });
 });

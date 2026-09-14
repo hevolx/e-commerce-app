@@ -106,9 +106,14 @@ const retriveUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
+  const requestedId = req.params.id;
   const userId = req.user.id;
+  const isOwnProfile = requestedId == userId;
   const { firstName } = req.body;
 
+  if (!isOwnProfile) {
+    return res.sendStatus(403);
+  }
   const query = `
     UPDATE users
     SET firstName = $2
