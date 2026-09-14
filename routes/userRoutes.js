@@ -21,4 +21,5 @@ router.get('/users/:id', userController.retriveUser);
 
 router.put('/users/:id', userController.updateUser);
 
+router.get('/account', userController.renderAccount);
 module.exports = router;

@@ -127,6 +127,10 @@ const updateUser = async (req, res) => {
   } else { res.status(200).json({ id: rows[0].id, firstName: rows[0].firstname }) }
 }
 
+const renderAccount = async (req, res) => {
+  res.status(200).render('pages/account', { user: req.user });
+}
+
 module.exports = {
   renderRegisterForm,
   createUser,
@@ -135,5 +139,6 @@ module.exports = {
   logoutUser,
   retriveAllUsers,
   retriveUser,
-  updateUser
+  updateUser,
+  renderAccount
 };
