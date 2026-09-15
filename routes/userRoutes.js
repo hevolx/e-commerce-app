@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const isAuthenticated = require('../middleware/isAuthenticated');
 
 // #region "Register route"
 router.post('/register', userController.createUser);
@@ -17,11 +18,13 @@ router.post('/logout', userController.logoutUser);
 // #endregion
 
 router.get('/users', userController.retriveAllUsers);
-router.get('/users/:id', userController.retriveUser);
+router.get('/users/:id', isAuthenticated, userController.retriveUser);
 
-router.put('/users/:id', userController.updateUser);
+router.delete('/users/:id', isAuthenticated, userController.deleteUser)
+
+router.put('/users/:id', isAuthenticated, userController.updateUser);
 
 router.get('/account', userController.renderAccount);
 
-router.post('/account', userController.updateAccount);
+router.post('/account', isAuthenticated, userController.updateAccount);
 module.exports = router;

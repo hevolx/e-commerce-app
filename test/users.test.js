@@ -161,3 +161,36 @@ describe('PUT /users/:id', () => {
     await pool.query('DELETE FROM users WHERE email = $1', [otherEmail]);
   });
 });
+
+describe('DELETE /users/:id', () => {
+  const email = `delete.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+  let userId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Rear',
+      lastName: 'Admiral',
+    });
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+
+    const result = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    userId = result.rows[0].id;
+  });
+
+  it("deletes the caller's own account", async () => {
+    const response = await request(app)
+      .delete(`/users/${userId}`)
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    expect(result.rows).toHaveLength(0);
+  });
+});

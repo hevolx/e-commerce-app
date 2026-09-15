@@ -77,7 +77,7 @@ const logoutUser = async (req, res, next) => {
 
 const retriveAllUsers = async (req, res) => {
   const query = `
-    SELECT *
+    SELECT id, email, firstName, lastName
     FROM users`;
 
   const { rows } = await pool.query(query);
@@ -94,7 +94,7 @@ const retriveUser = async (req, res) => {
   }
 
   const query = `
-    SELECT *
+    SELECT id, email, firstName, lastName
     FROM users
     WHERE id = $1`;
   const { rows } = await pool.query(query, [requestedId]);
@@ -152,6 +152,22 @@ const updateAccount = async (req, res) => {
   res.status(302).redirect("/account");
 }
 
+const deleteUser = async (req, res) => {
+  const requestedId = req.params.id;
+  const isOwnProfile = requestedId == req.user.id;
+
+  const query = `
+    DELETE FROM users
+    WHERE id = $1`;
+
+  if (isOwnProfile) {
+    await pool.query(query, [requestedId]);
+    res.sendStatus(200);
+  } else {
+    return res.sendStatus(403);
+  }
+}
+
 module.exports = {
   renderRegisterForm,
   createUser,
@@ -162,5 +178,6 @@ module.exports = {
   retriveUser,
   updateUser,
   renderAccount,
-  updateAccount
+  updateAccount,
+  deleteUser
 };
