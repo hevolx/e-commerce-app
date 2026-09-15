@@ -76,6 +76,12 @@ const logoutUser = async (req, res, next) => {
 // #endregion
 
 const retriveAllUsers = async (req, res) => {
+  const isAdmin = req.user.isadmin;
+
+  if (!isAdmin) {
+    return res.sendStatus(403);
+  }
+
   const query = `
     SELECT id, email, firstName, lastName
     FROM users`;

@@ -57,6 +57,12 @@ describe('GET /account', () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe('/account');
+
+    const result = await pool.query(
+      'SELECT firstname FROM users WHERE email = $1',
+      [email]
+    );
+    expect(result.rows[0].firstname).toBe('Marie');
   });
 
   it('renders a delete-account form requiring confirmation', async () => {
