@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 
 // #region "Register"
-const registerForm = async (req, res) => {
+const renderRegisterForm = async (req, res) => {
   res.render('pages/register')
 }
 
@@ -33,7 +33,7 @@ const createUser = async (req, res) => {
 
 // #region "Login"
 /** Renders the login form. */
-const loginForm = async (req, res) => {
+const renderLoginForm = async (req, res) => {
   res.render('pages/login')
 }
 
@@ -75,10 +75,127 @@ const logoutUser = async (req, res, next) => {
 }
 // #endregion
 
+const retriveAllUsers = async (req, res) => {
+  const isAdmin = req.user.isadmin;
+
+  if (!isAdmin) {
+    return res.sendStatus(403);
+  }
+
+  const query = `
+    SELECT id, email, firstName, lastName
+    FROM users`;
+
+  const { rows } = await pool.query(query);
+  res.status(200).json(rows);
+}
+
+const retriveUser = async (req, res) => {
+  const requestedId = req.params.id;
+  const isOwnProfile = requestedId == req.user.id;
+  const isAdmin = req.user.isadmin;
+
+  if (!isOwnProfile && !isAdmin) {
+    return res.sendStatus(403);
+  }
+
+  const query = `
+    SELECT id, email, firstName, lastName
+    FROM users
+    WHERE id = $1`;
+  const { rows } = await pool.query(query, [requestedId]);
+
+  if (rows[0] == null) {
+    return res.sendStatus(404);
+  }
+  res.status(200).json({ id: rows[0].id, email: rows[0].email });
+}
+
+const updateUser = async (req, res) => {
+  const requestedId = req.params.id;
+  const userId = req.user.id;
+  const isOwnProfile = requestedId == userId;
+  const { firstName } = req.body;
+
+  if (!isOwnProfile) {
+    return res.sendStatus(403);
+  }
+  const query = `
+    UPDATE users
+    SET firstName = $2
+    WHERE id = $1
+    RETURNING *`;
+
+  const { rows } = await pool.query(query, [userId, firstName]);
+
+  if (rows[0] == null) {
+    return res.sendStatus(404);
+  } else { res.status(200).json({ id: rows[0].id, firstName: rows[0].firstname }) }
+}
+
+const renderAccount = async (req, res) => {
+  if (req.user != null) {
+    res.status(200).render('pages/account', { user: req.user });
+  } else {
+    res.redirect("/login");
+  }
+}
+
+const updateAccount = async (req, res) => {
+  const userId = req.user.id;
+  const { firstname } = req.body;
+  const query = `
+    UPDATE users
+    SET firstName = $2
+    WHERE id = $1
+    RETURNING *`;
+
+  const { rows } = await pool.query(query, [userId, firstname]);
+
+  if (rows[0] == null) {
+    return res.sendStatus(404);
+  }
+  res.status(302).redirect("/account");
+}
+
+const deleteAccount = async (req, res) => {
+  const userId = req.user.id;
+  const sid = req.sessionID;
+
+  await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+  await pool.query('DELETE FROM session WHERE sid = $1', [sid]);
+
+  res.redirect('/login');
+}
+
+const deleteUser = async (req, res) => {
+  const requestedId = req.params.id;
+  const isOwnProfile = requestedId == req.user.id;
+  const isAdmin = req.user.isadmin;
+
+  const query = `
+    DELETE FROM users
+    WHERE id = $1`;
+
+  if (isAdmin == true || isOwnProfile) {
+    await pool.query(query, [requestedId]);
+    res.sendStatus(200);
+  } else {
+    return res.sendStatus(403);
+  }
+}
+
 module.exports = {
-  registerForm,
+  renderRegisterForm,
   createUser,
-  loginForm,
+  renderLoginForm,
   loginUser,
-  logoutUser
+  logoutUser,
+  retriveAllUsers,
+  retriveUser,
+  updateUser,
+  renderAccount,
+  updateAccount,
+  deleteUser,
+  deleteAccount
 };

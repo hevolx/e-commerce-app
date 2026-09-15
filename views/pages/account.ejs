@@ -1,0 +1,17 @@
+<form method="POST" action="/account" data-testid="account-edit-form">
+  <label for="firstname">Firstname:</label><br>
+  <input type="text" id="firstname" name="firstname" value="<%= user.firstname %>" required><br>
+  <input type="submit" value="Edit">
+</form>
+
+<p data-testid="account-profile">
+  <%= user.email %>
+</p>
+
+<form method="POST" action="/account/delete" data-testid="account-delete-form">
+  <label>
+    <input type="checkbox" name="confirmDelete" required>
+    Jag bekräftar att jag vill radera mitt konto
+  </label><br>
+  <input type="submit" value="Radera konto">
+</form>
