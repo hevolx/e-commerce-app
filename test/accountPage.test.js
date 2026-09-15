@@ -34,4 +34,11 @@ describe('GET /account', () => {
     expect(response.text).toContain('data-testid="account-profile"');
     expect(response.text).toContain(email);
   });
+
+  it('redirects to /login when there is no session', async () => {
+    const response = await request(app).get('/account');
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe('/login');
+  });
 });

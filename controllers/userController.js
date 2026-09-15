@@ -128,7 +128,11 @@ const updateUser = async (req, res) => {
 }
 
 const renderAccount = async (req, res) => {
-  res.status(200).render('pages/account', { user: req.user });
+  if (req.user != null) {
+    res.status(200).render('pages/account', { user: req.user });
+  } else {
+    res.redirect("/login");
+  }
 }
 
 module.exports = {
