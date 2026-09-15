@@ -193,4 +193,71 @@ describe('DELETE /users/:id', () => {
     const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     expect(result.rows).toHaveLength(0);
   });
+
+  it("returns 403 when the caller tries to delete another user's account", async () => {
+    const otherEmail = `other.delete.${Date.now()}@example.com`;
+    const otherPassword = 'supersecret123';
+
+    await request(app).post('/register').send({
+      email: otherEmail,
+      password: otherPassword,
+      firstName: 'Sally',
+      lastName: 'Ride',
+    });
+    const otherLoginResponse = await request(app)
+      .post('/login')
+      .send({ email: otherEmail, password: otherPassword });
+    const otherCookie = otherLoginResponse.headers['set-cookie'].find((c) =>
+      c.startsWith('connect.sid=')
+    );
+
+    const response = await request(app)
+      .delete(`/users/${userId}`)
+      .set('Cookie', otherCookie);
+
+    expect(response.status).toBe(403);
+
+    await pool.query('DELETE FROM users WHERE email = $1', [otherEmail]);
+  });
+
+  it('lets an admin delete another user\'s account', async () => {
+    const adminEmail = `admin.delete.${Date.now()}@example.com`;
+    const adminPassword = 'supersecret123';
+    const targetEmail = `target.delete.${Date.now()}@example.com`;
+
+    await request(app).post('/register').send({
+      email: adminEmail,
+      password: adminPassword,
+      firstName: 'Valentina',
+      lastName: 'Tereshkova',
+    });
+    await pool.query('UPDATE users SET isAdmin = true WHERE email = $1', [adminEmail]);
+
+    await request(app).post('/register').send({
+      email: targetEmail,
+      password: 'supersecret123',
+      firstName: 'Mae',
+      lastName: 'Jemison',
+    });
+    const targetResult = await pool.query('SELECT id FROM users WHERE email = $1', [targetEmail]);
+    const targetId = targetResult.rows[0].id;
+
+    const adminLoginResponse = await request(app)
+      .post('/login')
+      .send({ email: adminEmail, password: adminPassword });
+    const adminCookie = adminLoginResponse.headers['set-cookie'].find((c) =>
+      c.startsWith('connect.sid=')
+    );
+
+    const response = await request(app)
+      .delete(`/users/${targetId}`)
+      .set('Cookie', adminCookie);
+
+    expect(response.status).toBe(200);
+
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [targetId]);
+    expect(result.rows).toHaveLength(0);
+
+    await pool.query('DELETE FROM users WHERE email = $1', [adminEmail]);
+  });
 });

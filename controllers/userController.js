@@ -155,12 +155,13 @@ const updateAccount = async (req, res) => {
 const deleteUser = async (req, res) => {
   const requestedId = req.params.id;
   const isOwnProfile = requestedId == req.user.id;
+  const isAdmin = req.user.isadmin;
 
   const query = `
     DELETE FROM users
     WHERE id = $1`;
 
-  if (isOwnProfile) {
+  if (isAdmin == true || isOwnProfile) {
     await pool.query(query, [requestedId]);
     res.sendStatus(200);
   } else {
