@@ -41,4 +41,11 @@ describe('GET /account', () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe('/login');
   });
+
+  it('renders an edit form prefilled with the current firstName', async () => {
+    const response = await request(app).get('/account').set('Cookie', cookie);
+
+    expect(response.text).toContain('data-testid="account-edit-form"');
+    expect(response.text).toContain('value="Rosalind"');
+  });
 });
