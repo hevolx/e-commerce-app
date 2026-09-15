@@ -58,4 +58,25 @@ describe('GET /account', () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe('/account');
   });
+
+  it('renders a delete-account form requiring confirmation', async () => {
+    const response = await request(app).get('/account').set('Cookie', cookie);
+
+    expect(response.text).toContain('data-testid="account-delete-form"');
+    expect(response.text).toContain('name="confirmDelete"');
+    expect(response.text).toContain('required');
+  });
+
+  it('deletes the account and redirects to /login when confirmed', async () => {
+    const response = await request(app)
+      .post('/account/delete')
+      .set('Cookie', cookie)
+      .send({ confirmDelete: 'on' });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe('/login');
+
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    expect(result.rows).toHaveLength(0);
+  });
 });

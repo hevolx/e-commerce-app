@@ -27,4 +27,6 @@ router.put('/users/:id', isAuthenticated, userController.updateUser);
 router.get('/account', userController.renderAccount);
 
 router.post('/account', isAuthenticated, userController.updateAccount);
+
+router.post('/account/delete', isAuthenticated, userController.deleteAccount);
 module.exports = router;

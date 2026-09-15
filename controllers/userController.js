@@ -152,6 +152,16 @@ const updateAccount = async (req, res) => {
   res.status(302).redirect("/account");
 }
 
+const deleteAccount = async (req, res) => {
+  const userId = req.user.id;
+  const sid = req.sessionID;
+
+  await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+  await pool.query('DELETE FROM session WHERE sid = $1', [sid]);
+
+  res.redirect('/login');
+}
+
 const deleteUser = async (req, res) => {
   const requestedId = req.params.id;
   const isOwnProfile = requestedId == req.user.id;
@@ -180,5 +190,6 @@ module.exports = {
   updateUser,
   renderAccount,
   updateAccount,
-  deleteUser
+  deleteUser,
+  deleteAccount
 };
