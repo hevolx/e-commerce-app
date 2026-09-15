@@ -48,4 +48,14 @@ describe('GET /account', () => {
     expect(response.text).toContain('data-testid="account-edit-form"');
     expect(response.text).toContain('value="Rosalind"');
   });
+
+  it('redirects to /account after saving a new firstName', async () => {
+    const response = await request(app)
+      .post('/account')
+      .set('Cookie', cookie)
+      .send({ firstname: 'Marie' });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe('/account');
+  });
 });

@@ -23,4 +23,5 @@ router.put('/users/:id', userController.updateUser);
 
 router.get('/account', userController.renderAccount);
 
+router.post('/account', userController.updateAccount);
 module.exports = router;
