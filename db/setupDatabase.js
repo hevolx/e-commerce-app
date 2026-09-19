@@ -58,7 +58,9 @@ const { DB } = require('./config');
     CREATE TABLE IF NOT EXISTS carts (
       id              INT             PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
       created         TIMESTAMP NOT NULL DEFAULT NOW(),
-      modified        TIMESTAMP NOT NULL DEFAULT NOW()
+      modified        TIMESTAMP NOT NULL DEFAULT NOW(),
+      userId          INT             NOT NULL,
+      FOREIGN KEY (userId) REFERENCES users(id)
     );
   `
 
