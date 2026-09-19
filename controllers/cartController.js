@@ -14,6 +14,27 @@ const createCart = async (req, res) => {
   } else { res.status(201).json({ id: rows[0].id, userid: rows[0].userId }) };
 }
 
+const addProduct = async (req, res) => {
+  const cartId = req.params.id;
+  const { productId } = req.body;
+
+  const query = `
+INSERT INTO cartItems (cartId, productId)
+VALUES ($1, $2)
+RETURNING *`;
+
+  try {
+    const { rows } = await pool.query(query, [cartId, productId]);
+
+    if (rows[0] == null) {
+      return res.sendStatus(409);
+    } else { res.status(201).json({ cartid: rows[0].cartId, productid: rows[0].productId }) };
+  } catch (err) {
+    res.sendStatus(500);
+  }
+}
+
 module.exports = {
-  createCart
+  createCart,
+  addProduct
 };
