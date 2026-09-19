@@ -14,7 +14,7 @@ const createCart = async (req, res) => {
   } else { res.status(201).json({ id: rows[0].id, userid: rows[0].userId }) };
 }
 
-const addProduct = async (req, res) => {
+const addProductToCart = async (req, res) => {
   const cartId = req.params.id;
   const { productId } = req.body;
 
@@ -31,6 +31,21 @@ const addProduct = async (req, res) => {
       return res.sendStatus(409);
     } else { res.status(201).json({ cartid: rows[0].cartId, productid: rows[0].productId }) };
   } catch (err) {
+    res.sendStatus(500);
+  }
+}
+
+const removeProductFromCart = async (req, res) => {
+  const { cartId, itemId } = req.params;
+
+  const query = `
+    DELETE FROM cartItems
+    WHERE id = $1 AND cartId = $2`;
+
+  try {
+    await pool.query(query, [itemId, cartId]);
+    res.sendStatus(200);
+  } catch (err) {
     console.log(err);
     res.sendStatus(500);
   }
@@ -38,5 +53,6 @@ const addProduct = async (req, res) => {
 
 module.exports = {
   createCart,
-  addProduct
+  addProductToCart,
+  removeProductFromCart
 };
