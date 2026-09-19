@@ -19,9 +19,10 @@ const addProduct = async (req, res) => {
   const { productId } = req.body;
 
   const query = `
-INSERT INTO cartItems (cartId, productId)
-VALUES ($1, $2)
-RETURNING *`;
+    INSERT INTO cartItems (cartId, productId)
+    VALUES ($1, $2)
+    ON CONFLICT (cartId, productId) DO UPDATE SET qty = cartItems.qty + 1
+    RETURNING *`;
 
   try {
     const { rows } = await pool.query(query, [cartId, productId]);
@@ -30,6 +31,7 @@ RETURNING *`;
       return res.sendStatus(409);
     } else { res.status(201).json({ cartid: rows[0].cartId, productid: rows[0].productId }) };
   } catch (err) {
+    console.log(err);
     res.sendStatus(500);
   }
 }

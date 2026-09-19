@@ -67,10 +67,12 @@ const { DB } = require('./config');
   const cartItemsTable = `
     CREATE TABLE IF NOT EXISTS cartItems (
       id              INT             PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
+      qty             INT             NOT NULL DEFAULT 1 CHECK (qty > 0),
       cartId          INT             NOT NULL,
       productId       INT             NOT NULL,
       FOREIGN KEY (cartId) REFERENCES carts(id),
-      FOREIGN KEY (productId) REFERENCES products(id)
+      FOREIGN KEY (productId) REFERENCES products(id),
+      UNIQUE (cartId, productId)
     );
   `
 
