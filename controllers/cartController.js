@@ -75,9 +75,36 @@ const calculateTotal = async (req, res) => {
   }
 }
 
+const renderCart = async (req, res) => {
+  const cartId = req.params.id;
+
+  try {
+    const query = `
+      SELECT *
+      FROM cartItems
+      JOIN products ON products.id = cartItems.productId
+      WHERE cartId = $1`;
+
+    const { rows } = await pool.query(query, [cartId]);
+
+    let total = 0;
+    for (let i = 0; i < rows.length; i++) {
+      total += rows[i].qty * rows[i].price;
+    };
+
+    if (rows[0] == null) {
+      return res.sendStatus(404);
+    } else { res.status(200).render('pages/cart', { carts: rows, total: total }) }
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+}
+
 module.exports = {
   createCart,
   addProductToCart,
   removeProductFromCart,
-  calculateTotal
+  calculateTotal,
+  renderCart
 };

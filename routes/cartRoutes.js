@@ -9,4 +9,7 @@ router.post('/cart/:id', isAuthenticated, cartController.addProductToCart);
 router.delete('/cart/:cartId/items/:itemId', isAuthenticated, cartController.removeProductFromCart);
 
 router.get('/cart/:id', isAuthenticated, cartController.calculateTotal);
+
+router.get('/carts/:id', isAuthenticated, cartController.renderCart);
+
 module.exports = router;

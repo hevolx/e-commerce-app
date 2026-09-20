@@ -1,0 +1,11 @@
+<ul data-testid="cart-page">
+  <% carts.forEach(function(cart) { %>
+    <li>
+      <%= cart.name %>
+    </li>
+    <% }); %>
+</ul>
+
+<p>
+  <%= total %>
+</p>
