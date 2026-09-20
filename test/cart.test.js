@@ -220,3 +220,55 @@ describe('DELETE /cart/:cartId/items/:itemId', () => {
     expect(result.rows).toHaveLength(0);
   });
 });
+
+describe('GET /cart/:cartId', () => {
+  const email = `cart.view.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+  let userId;
+  let cartId;
+  let productId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Sally',
+      lastName: 'Ride',
+    });
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+
+    const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    userId = userResult.rows[0].id;
+
+    const cartResponse = await request(app).post('/cart').set('Cookie', cookie);
+    cartId = cartResponse.body.id;
+
+    const productResult = await pool.query(
+      `INSERT INTO products (name, price, description)
+      VALUES ($1, $2, $3)
+      RETURNING id`,
+      ['View Test Product', 10.00, 'A product used for cart viewing testing']
+    );
+    productId = productResult.rows[0].id;
+
+    await request(app).post(`/cart/${cartId}`).set('Cookie', cookie).send({ productId });
+    await request(app).post(`/cart/${cartId}`).set('Cookie', cookie).send({ productId });
+  });
+
+  afterAll(async () => {
+    await pool.query('DELETE FROM cartItems WHERE cartId = $1', [cartId]);
+    await pool.query('DELETE FROM products WHERE id = $1', [productId]);
+    await pool.query('DELETE FROM carts WHERE userid = $1', [userId]);
+    await pool.query('DELETE FROM users WHERE email = $1', [email]);
+  });
+
+  it("returns the cart's contents with a calculated total", async () => {
+    const response = await request(app).get(`/cart/${cartId}`).set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(20);
+  });
+});

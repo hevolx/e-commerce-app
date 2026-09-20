@@ -6,6 +6,7 @@ const isAuthenticated = require('../middleware/isAuthenticated');
 router.post('/cart', isAuthenticated, cartController.createCart);
 router.post('/cart/:id', isAuthenticated, cartController.addProductToCart);
 
-router.delete('/cart/:cartId/items/:itemId', isAuthenticated, cartController.removeProductFromCart)
+router.delete('/cart/:cartId/items/:itemId', isAuthenticated, cartController.removeProductFromCart);
 
+router.get('/cart/:id', isAuthenticated, cartController.calculateTotal);
 module.exports = router;

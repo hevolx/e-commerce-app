@@ -51,8 +51,33 @@ const removeProductFromCart = async (req, res) => {
   }
 }
 
+const calculateTotal = async (req, res) => {
+  const cartId = req.params.id;
+
+  try {
+    const query = `
+      SELECT *
+      FROM cartItems
+      JOIN products ON products.id = cartItems.productId
+      WHERE cartId = $1`;
+
+    const { rows } = await pool.query(query, [cartId]);
+
+    let total = 0;
+    for (let i = 0; i < rows.length; i++) {
+      total += rows[i].qty * rows[i].price;
+    };
+
+    res.status(200).json({ total: total });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+}
+
 module.exports = {
   createCart,
   addProductToCart,
-  removeProductFromCart
+  removeProductFromCart,
+  calculateTotal
 };
