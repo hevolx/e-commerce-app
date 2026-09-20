@@ -2,6 +2,9 @@
   <% carts.forEach(function(cart) { %>
     <li>
       <%= cart.name %>
+      <form method="POST" action="/cart/<%= cartId %>/items/<%= cart.id %>/delete" data-testid="cart-remove-form">
+        <input type="submit" value="Remove">
+      </form>
     </li>
     <% }); %>
 </ul>
@@ -9,3 +12,9 @@
 <p>
   <%= total %>
 </p>
+
+<form method="POST" action="/cart/<%= cartId %>" data-testid="cart-add-form">
+  <label for="productId">Product ID:</label><br>
+  <input type="text" id="productId" name="productId" required><br>
+  <input type="submit" value="Submit">
+</form>

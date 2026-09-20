@@ -80,7 +80,7 @@ const renderCart = async (req, res) => {
 
   try {
     const query = `
-      SELECT *
+      SELECT cartItems.id, cartItems.qty, products.name, products.price
       FROM cartItems
       JOIN products ON products.id = cartItems.productId
       WHERE cartId = $1`;
@@ -94,11 +94,22 @@ const renderCart = async (req, res) => {
 
     if (rows[0] == null) {
       return res.sendStatus(404);
-    } else { res.status(200).render('pages/cart', { carts: rows, total: total }) }
+    } else { res.status(200).render('pages/cart', { carts: rows, total: total, cartId: cartId }) }
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
   }
+}
+
+const renderRemoveProductFromCartForm = async (req, res) => {
+  const { cartId, itemId } = req.params;
+
+  const query = `
+    DELETE FROM cartItems
+    WHERE id = $1 AND cartId = $2`;
+
+  await pool.query(query, [itemId, cartId]);
+  res.redirect(`/carts/${cartId}`);
 }
 
 module.exports = {
@@ -106,5 +117,6 @@ module.exports = {
   addProductToCart,
   removeProductFromCart,
   calculateTotal,
-  renderCart
+  renderCart,
+  renderRemoveProductFromCartForm
 };

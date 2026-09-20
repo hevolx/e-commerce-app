@@ -12,4 +12,5 @@ router.get('/cart/:id', isAuthenticated, cartController.calculateTotal);
 
 router.get('/carts/:id', isAuthenticated, cartController.renderCart);
 
+router.post('/cart/:cartId/items/:itemId/delete', isAuthenticated, cartController.renderRemoveProductFromCartForm);
 module.exports = router;

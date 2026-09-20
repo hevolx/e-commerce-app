@@ -13,6 +13,7 @@ describe('GET /carts/:id', () => {
   let userId;
   let cartId;
   let productId;
+  let itemId;
 
   beforeAll(async () => {
     await request(app).post('/register').send({
@@ -40,6 +41,12 @@ describe('GET /carts/:id', () => {
     productId = productResult.rows[0].id;
 
     await request(app).post(`/cart/${cartId}`).set('Cookie', cookie).send({ productId });
+
+    const itemResult = await pool.query(
+      'SELECT id FROM cartItems WHERE cartId = $1 AND productId = $2',
+      [cartId, productId]
+    );
+    itemId = itemResult.rows[0].id;
   });
 
   afterAll(async () => {
@@ -56,5 +63,20 @@ describe('GET /carts/:id', () => {
     expect(response.text).toContain('data-testid="cart-page"');
     expect(response.text).toContain('Cart Page Test Product');
     expect(response.text).toContain('10');
+  });
+
+  it('renders a form for adding a product to the cart', async () => {
+    const response = await request(app).get(`/carts/${cartId}`).set('Cookie', cookie);
+
+    expect(response.text).toContain('data-testid="cart-add-form"');
+    expect(response.text).toContain(`action="/cart/${cartId}"`);
+    expect(response.text).toContain('name="productId"');
+  });
+
+  it('renders a form for removing a product from the cart', async () => {
+    const response = await request(app).get(`/carts/${cartId}`).set('Cookie', cookie);
+
+    expect(response.text).toContain('data-testid="cart-remove-form"');
+    expect(response.text).toContain(`action="/cart/${cartId}/items/${itemId}/delete"`);
   });
 });
