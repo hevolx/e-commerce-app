@@ -1,21 +1,30 @@
 const pool = require('../db/pool');
 
+const findOwnedCart = async (cartId, userid) => {
+  const { rows } = await pool.query(
+    'SELECT id FROM carts WHERE id = $1 AND userid = $2',
+    [cartId, userid]
+  );
+  return rows[0] || null;
+};
+
 const createCart = async (req, res) => {
-  const userid = req.user.id;
+  const userId = req.user.id;
   const query = `
   INSERT INTO carts (userId)
   VALUES ($1)
   RETURNING *`;
 
-  const { rows } = await pool.query(query, [userid]);
+  const { rows } = await pool.query(query, [userId]);
 
   if (rows[0] == null) {
     return res.sendStatus(409);
-  } else { res.status(201).json({ id: rows[0].id, userid: rows[0].userId }) };
+  } else { res.status(201).json({ id: rows[0].id, userid: rows[0].userid }) };
 }
 
 const addProductToCart = async (req, res) => {
   const cartId = req.params.id;
+  const userId = req.user.id;
   const { productId } = req.body;
 
   const query = `
@@ -25,11 +34,16 @@ const addProductToCart = async (req, res) => {
     RETURNING *`;
 
   try {
+    const cart = await findOwnedCart(cartId, userId);
+    if (!cart) {
+      return res.sendStatus(404);
+    }
+
     const { rows } = await pool.query(query, [cartId, productId]);
 
     if (rows[0] == null) {
       return res.sendStatus(409);
-    } else { res.status(201).json({ cartid: rows[0].cartId, productid: rows[0].productId }) };
+    } else { res.status(201).json({ cartid: rows[0].cartid, productid: rows[0].productid }) };
   } catch (err) {
     res.sendStatus(500);
   }
@@ -37,12 +51,18 @@ const addProductToCart = async (req, res) => {
 
 const removeProductFromCart = async (req, res) => {
   const { cartId, itemId } = req.params;
+  const userId = req.user.id;
 
   const query = `
     DELETE FROM cartItems
     WHERE id = $1 AND cartId = $2`;
 
   try {
+    const cart = await findOwnedCart(cartId, userId);
+    if (!cart) {
+      return res.sendStatus(404);
+    }
+
     await pool.query(query, [itemId, cartId]);
     res.sendStatus(200);
   } catch (err) {
@@ -53,8 +73,14 @@ const removeProductFromCart = async (req, res) => {
 
 const calculateTotal = async (req, res) => {
   const cartId = req.params.id;
+  const userId = req.user.id;
 
   try {
+    const cart = await findOwnedCart(cartId, userId);
+    if (!cart) {
+      return res.sendStatus(404);
+    }
+
     const query = `
       SELECT *
       FROM cartItems
@@ -77,8 +103,14 @@ const calculateTotal = async (req, res) => {
 
 const renderCart = async (req, res) => {
   const cartId = req.params.id;
+  const userId = req.user.id;
 
   try {
+    const cart = await findOwnedCart(cartId, userId);
+    if (!cart) {
+      return res.sendStatus(404);
+    }
+
     const query = `
       SELECT cartItems.id, cartItems.qty, products.name, products.price
       FROM cartItems
@@ -92,9 +124,7 @@ const renderCart = async (req, res) => {
       total += rows[i].qty * rows[i].price;
     };
 
-    if (rows[0] == null) {
-      return res.sendStatus(404);
-    } else { res.status(200).render('pages/cart', { carts: rows, total: total, cartId: cartId }) }
+    res.status(200).render('pages/cart', { carts: rows, total: total, cartId: cartId });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
@@ -103,10 +133,16 @@ const renderCart = async (req, res) => {
 
 const renderRemoveProductFromCartForm = async (req, res) => {
   const { cartId, itemId } = req.params;
+  const userId = req.user.id;
 
   const query = `
     DELETE FROM cartItems
     WHERE id = $1 AND cartId = $2`;
+
+  const cart = await findOwnedCart(cartId, userId);
+  if (!cart) {
+    return res.sendStatus(404);
+  }
 
   await pool.query(query, [itemId, cartId]);
   res.redirect(`/carts/${cartId}`);
