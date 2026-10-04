@@ -31,7 +31,7 @@ const { DB } = require('./config');
   const ordersTable = `
     CREATE TABLE IF NOT EXISTS orders (
       id              INT             PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
-      total           INT             NOT NULL,
+      total           DECIMAL(10, 2)  NOT NULL,
       status          VARCHAR(50)     NOT NULL,
       created         TIMESTAMP NOT NULL DEFAULT NOW(),
       modified        TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -44,7 +44,7 @@ const { DB } = require('./config');
     CREATE TABLE IF NOT EXISTS orderItems (
       id              INT             PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
       qty             INT             NOT NULL CHECK (qty > 0),
-      price           INT             NOT NULL,
+      price           DECIMAL(10, 2)  NOT NULL,
       created         TIMESTAMP NOT NULL DEFAULT NOW(),
       modified        TIMESTAMP NOT NULL DEFAULT NOW(),
       orderId         INT             NOT NULL,
