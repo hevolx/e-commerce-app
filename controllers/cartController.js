@@ -1,12 +1,5 @@
 const pool = require('../db/pool');
-
-const findOwnedCart = async (cartId, userid) => {
-  const { rows } = await pool.query(
-    'SELECT id FROM carts WHERE id = $1 AND userid = $2',
-    [cartId, userid]
-  );
-  return rows[0] || null;
-};
+const { findOwnedCart, sumCartItems } = require('../services/cartService');
 
 const createCart = async (req, res) => {
   const userId = req.user.id;
@@ -89,10 +82,7 @@ const calculateTotal = async (req, res) => {
 
     const { rows } = await pool.query(query, [cartId]);
 
-    let total = 0;
-    for (let i = 0; i < rows.length; i++) {
-      total += rows[i].qty * rows[i].price;
-    };
+    const total = sumCartItems(rows);
 
     res.status(200).json({ total: total });
   } catch (err) {
