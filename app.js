@@ -10,6 +10,7 @@ require('./middleware/isAuthenticated');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 
 
 // #region "GENERAL SETUP"
@@ -59,6 +60,7 @@ app.use(require('./middleware/passportSession'));
 app.use('/', userRoutes);
 app.use('/', productRoutes);
 app.use('/', cartRoutes);
+app.use('/', checkoutRoutes);
 // #endregion
 
 module.exports = { app, sessionStore };
