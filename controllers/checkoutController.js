@@ -1,12 +1,6 @@
 const pool = require('../db/pool');
-
-const findOwnedCart = async (cartId, userid) => {
-  const { rows } = await pool.query(
-    'SELECT id FROM carts WHERE id = $1 AND userid = $2',
-    [cartId, userid]
-  );
-  return rows[0] || null;
-};
+const { processPayment } = require('../services/paymentService');
+const { findOwnedCart, sumCartItems } = require('../services/cartService');
 
 const checkoutCart = async (req, res) => {
   const cartId = req.params.id;
@@ -28,7 +22,12 @@ const checkoutCart = async (req, res) => {
     
     if (rows.length === 0) {
       return res.sendStatus(400);
-    } else { res.json(rows) }
+    }
+
+    const total = sumCartItems(rows);
+    await processPayment(total);
+
+    res.status(201).json(rows);
   
   } catch (err) {
     console.log(err);
