@@ -12,12 +12,8 @@ const sumCartItems = (items) => {
   return items.reduce((sum, item) => sum + item.qty * Number(item.price), 0);
 };
 
-const emptyCart = async (cartId, userId) => {
-  const { rows } = await pool.query(
-    'DELETE FROM cartItems WHERE cartId = $1',
-    [cartId]
-  );
-  return rows[0] || null;
+const emptyCart = async (cartId) => {
+  await pool.query('DELETE FROM cartItems WHERE cartId = $1', [cartId]);
 };
 
 module.exports = {

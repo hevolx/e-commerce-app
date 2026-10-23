@@ -28,10 +28,8 @@ const checkoutCart = async (req, res) => {
     const total = sumCartItems(rows);
     await processPayment(total);
     const order = await createOrder(userId, total, rows);
-    
-    // Remove all items from the cart
-    await emptyCart(cartId, userId);
-   
+    await emptyCart(cartId);
+
     res.status(201).json(order);
   } catch (err) {
     console.log(err);
