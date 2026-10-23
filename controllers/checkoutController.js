@@ -1,6 +1,6 @@
 const pool = require('../db/pool');
 const { processPayment } = require('../services/paymentService');
-const { findOwnedCart, sumCartItems } = require('../services/cartService');
+const { findOwnedCart, sumCartItems, emptyCart } = require('../services/cartService');
 const { createOrder } = require('../services/orderService');
 
 const checkoutCart = async (req, res) => {
@@ -28,9 +28,11 @@ const checkoutCart = async (req, res) => {
     const total = sumCartItems(rows);
     await processPayment(total);
     const order = await createOrder(userId, total, rows);
-
+    
+    // Remove all items from the cart
+    await emptyCart(cartId, userId);
+   
     res.status(201).json(order);
-  
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
