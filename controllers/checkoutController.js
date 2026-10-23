@@ -1,6 +1,7 @@
 const pool = require('../db/pool');
 const { processPayment } = require('../services/paymentService');
 const { findOwnedCart, sumCartItems } = require('../services/cartService');
+const { createOrder } = require('../services/orderService');
 
 const checkoutCart = async (req, res) => {
   const cartId = req.params.id;
@@ -13,7 +14,7 @@ const checkoutCart = async (req, res) => {
     }
     
     const query = `
-      SELECT ci.id AS cartItemId, ci.qty, p.price
+      SELECT ci.id AS cartItemId, ci.qty, p.price, p.id AS productId
       FROM cartItems ci
       JOIN products p ON ci.productId = p.id
       WHERE ci.cartId = $1
@@ -26,8 +27,9 @@ const checkoutCart = async (req, res) => {
 
     const total = sumCartItems(rows);
     await processPayment(total);
+    const order = await createOrder(userId, total, rows);
 
-    res.status(201).json(rows);
+    res.status(201).json(order);
   
   } catch (err) {
     console.log(err);
