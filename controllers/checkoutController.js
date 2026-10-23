@@ -41,7 +41,12 @@ const renderCheckout = (req, res) => {
   res.status(200).render('pages/checkout', { cartId: req.params.id });
 };
 
+const renderOrderConfirmation = (req, res) => {
+  res.status(200).render('pages/orderConfirmation', { orderId: req.params.id });
+};
+
 module.exports = {
   checkoutCart,
-  renderCheckout
+  renderCheckout,
+  renderOrderConfirmation
 }
