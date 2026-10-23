@@ -37,6 +37,11 @@ const checkoutCart = async (req, res) => {
   }
 }
 
+const renderCheckout = (req, res) => {
+  res.status(200).render('pages/checkout', { cartId: req.params.id });
+};
+
 module.exports = {
-  checkoutCart
+  checkoutCart,
+  renderCheckout
 }
