@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 
 // #region "GENERAL SETUP"
@@ -61,6 +62,7 @@ app.use('/', userRoutes);
 app.use('/', productRoutes);
 app.use('/', cartRoutes);
 app.use('/', checkoutRoutes);
+app.use('/', orderRoutes);
 // #endregion
 
 module.exports = { app, sessionStore };
