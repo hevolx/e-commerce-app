@@ -10,6 +10,9 @@
   <% products.forEach(function(product) { %>
     <li class="product-card">
       <a href="/product/<%= product.id %>">
+        <% if (product.url) { %>
+          <img src="<%= product.url %>" alt="<%= product.name %>" loading="lazy">
+        <% } %>
         <h2><%= product.name %></h2>
       </a>
       <p class="muted"><%= product.description %></p>

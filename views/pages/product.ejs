@@ -3,7 +3,10 @@
 <p><a href="/">&larr; All products</a></p>
 
 <% products.forEach(function(product) { %>
-  <section class="card" data-testid="product-detail">
+  <section class="card product-detail" data-testid="product-detail">
+    <% if (product.url) { %>
+      <img src="<%= product.url %>" alt="<%= product.name %>">
+    <% } %>
     <h1><%= product.name %></h1>
     <p><%= product.description %></p>
     <p class="price"><%= formatPrice(product.price) %></p>

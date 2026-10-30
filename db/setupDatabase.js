@@ -21,11 +21,16 @@ const { DB } = require('./config');
       id              INT             PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
       name            VARCHAR(50)     NOT NULL,
       price           DECIMAL(10, 2)  NOT NULL,
-      description     VARCHAR(50)     NOT NULL,
+      description     TEXT            NOT NULL,
       url             VARCHAR(255),
       created         TIMESTAMP NOT NULL DEFAULT NOW(),
       modified        TIMESTAMP NOT NULL DEFAULT NOW()
     );
+  `
+
+  // Databases created before descriptions became TEXT still have VARCHAR(50)
+  const widenProductDescription = `
+    ALTER TABLE products ALTER COLUMN description TYPE TEXT;
   `
 
   const ordersTable = `
@@ -103,6 +108,7 @@ const { DB } = require('./config');
     // Create tables on database
     await db.query(usersTable);
     await db.query(productsTable);
+    await db.query(widenProductDescription);
     await db.query(ordersTable);
     await db.query(orderItemsTable);
     await db.query(cartsTable);

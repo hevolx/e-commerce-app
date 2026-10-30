@@ -153,6 +153,27 @@ ul li {
   padding: 1rem;
 }
 
+.product-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+  background: var(--color-bg);
+  border-radius: var(--radius);
+}
+
+.product-detail img {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  margin-bottom: 1rem;
+  background: var(--color-bg);
+  border-radius: var(--radius);
+}
+
 .product-card h2 {
   margin: 0 0 0.25rem;
   font-size: 1.125rem;
