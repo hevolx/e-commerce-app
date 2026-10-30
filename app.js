@@ -58,6 +58,12 @@ app.use(
 );
 
 app.use(require('./middleware/passportSession'));
+
+// Expose the logged-in user to all views
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+  next();
+});
 // #endregion
 
 // #region "API DOCS"

@@ -2,7 +2,15 @@
   <nav data-testid="site-nav">
     <a href="/">Home</a>
     <a href="/cart">Cart</a>
-    <a href="/login" data-testid="nav-login">Log in</a>
-    <a href="/register" data-testid="nav-register">Register</a>
+    <% if (user) { %>
+      <a href="/account" data-testid="nav-account">Account</a>
+      <a href="/order-history" data-testid="nav-order-history">Order history</a>
+      <form method="POST" action="/logout" data-testid="nav-logout">
+        <button type="submit">Log out</button>
+      </form>
+    <% } else { %>
+      <a href="/login" data-testid="nav-login">Log in</a>
+      <a href="/register" data-testid="nav-register">Register</a>
+    <% } %>
   </nav>
 </header>
