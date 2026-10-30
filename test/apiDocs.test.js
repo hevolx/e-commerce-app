@@ -12,4 +12,13 @@ describe('GET /api-docs', () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain('swagger-ui');
   });
+
+  it('documents the authentication endpoints', async () => {
+    const response = await request(app).get('/api-docs/swagger-ui-init.js');
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('"/register"');
+    expect(response.text).toContain('"/login"');
+    expect(response.text).toContain('"/logout"');
+  });
 });

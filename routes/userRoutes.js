@@ -4,16 +4,34 @@ const userController = require('../controllers/userController');
 const isAuthenticated = require('../middleware/isAuthenticated');
 
 // #region "Register route"
+/**
+ * @openapi
+ * /register:
+ *   post:
+ *     summary: Register a new user
+ */
 router.post('/register', userController.createUser);
 router.get('/register', userController.renderRegisterForm);
 // #endregion
 
 // #region "Login route"
+/**
+ * @openapi
+ * /login:
+ *   post:
+ *     summary: Log in with username and password
+ */
 router.post('/login', userController.loginUser);
 router.get('/login', userController.renderLoginForm);
 // #endregion
 
 // #region "Logout route"
+/**
+ * @openapi
+ * /logout:
+ *   post:
+ *     summary: Log out and end the session
+ */
 router.post('/logout', userController.logoutUser);
 // #endregion
 
