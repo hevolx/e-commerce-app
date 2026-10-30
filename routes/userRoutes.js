@@ -35,11 +35,35 @@ router.get('/login', userController.renderLoginForm);
 router.post('/logout', userController.logoutUser);
 // #endregion
 
+/**
+ * @openapi
+ * /users:
+ *   get:
+ *     summary: List all users (admin)
+ */
 router.get('/users', userController.retriveAllUsers);
+/**
+ * @openapi
+ * /users/{userId}:
+ *   get:
+ *     summary: Get a user profile
+ */
 router.get('/users/:id', isAuthenticated, userController.retriveUser);
 
+/**
+ * @openapi
+ * /users/{userId}:
+ *   delete:
+ *     summary: Delete a user account
+ */
 router.delete('/users/:id', isAuthenticated, userController.deleteUser)
 
+/**
+ * @openapi
+ * /users/{userId}:
+ *   put:
+ *     summary: Update a user profile
+ */
 router.put('/users/:id', isAuthenticated, userController.updateUser);
 
 router.get('/account', userController.renderAccount);

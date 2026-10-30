@@ -44,4 +44,13 @@ describe('GET /api-docs', () => {
     expect(spec.paths['/products/{productId}']).toHaveProperty('put');
     expect(spec.paths['/products/{productId}']).toHaveProperty('delete');
   });
+
+  it('documents the user endpoints', async () => {
+    const spec = await fetchSpec();
+
+    expect(spec.paths['/users']).toHaveProperty('get');
+    expect(spec.paths['/users/{userId}']).toHaveProperty('get');
+    expect(spec.paths['/users/{userId}']).toHaveProperty('put');
+    expect(spec.paths['/users/{userId}']).toHaveProperty('delete');
+  });
 });
