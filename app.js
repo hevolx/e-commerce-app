@@ -28,7 +28,8 @@ const app = express();
 app.set('view engine', 'ejs');
 
 // Prices come from DECIMAL columns as strings, so normalise them for display
-app.locals.formatPrice = (price) => `${Number(price).toFixed(2)} kr`;
+const priceFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+app.locals.formatPrice = (price) => priceFormat.format(Number(price));
 
 // Middleware that allows Express to parse through JSON and x-www-form-urlencoded request bodies
 app.use(express.json());
