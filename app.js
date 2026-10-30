@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
@@ -65,7 +66,7 @@ const swaggerSpec = swaggerJsdoc({
     openapi: '3.0.0',
     info: { title: 'E-commerce API', version: '1.0.0' }
   },
-  apis: ['./routes/*.js']
+  apis: [path.join(__dirname, 'routes/*.js')]
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
