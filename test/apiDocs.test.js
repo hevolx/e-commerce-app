@@ -53,4 +53,14 @@ describe('GET /api-docs', () => {
     expect(spec.paths['/users/{userId}']).toHaveProperty('put');
     expect(spec.paths['/users/{userId}']).toHaveProperty('delete');
   });
+
+  it('documents the cart and checkout endpoints', async () => {
+    const spec = await fetchSpec();
+
+    expect(spec.paths['/cart']).toHaveProperty('post');
+    expect(spec.paths['/cart/{cartId}']).toHaveProperty('get');
+    expect(spec.paths['/cart/{cartId}']).toHaveProperty('post');
+    expect(spec.paths['/cart/{cartId}/items/{itemId}']).toHaveProperty('delete');
+    expect(spec.paths['/cart/{cartId}/checkout']).toHaveProperty('post');
+  });
 });
