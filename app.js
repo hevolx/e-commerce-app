@@ -80,4 +80,10 @@ app.use('/', checkoutRoutes);
 app.use('/', orderRoutes);
 // #endregion
 
+// #region "ERROR HANDLING"
+app.use((req, res) => {
+  res.status(404).render('pages/notFound');
+});
+// #endregion
+
 module.exports = { app, sessionStore };
