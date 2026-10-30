@@ -27,9 +27,16 @@ const app = express();
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
+// Prices come from DECIMAL columns as strings, so normalise them for display
+const priceFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+app.locals.formatPrice = (price) => priceFormat.format(Number(price));
+
 // Middleware that allows Express to parse through JSON and x-www-form-urlencoded request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static assets (CSS, images) from /public
+app.use(express.static(path.join(__dirname, 'public')));
 // #endregion
 
 // #region "SESSION SETUP"
@@ -58,6 +65,12 @@ app.use(
 );
 
 app.use(require('./middleware/passportSession'));
+
+// Expose the logged-in user to all views
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+  next();
+});
 // #endregion
 
 // #region "API DOCS"
@@ -78,6 +91,17 @@ app.use('/', productRoutes);
 app.use('/', cartRoutes);
 app.use('/', checkoutRoutes);
 app.use('/', orderRoutes);
+// #endregion
+
+// #region "ERROR HANDLING"
+app.use((req, res) => {
+  res.status(404).render('pages/notFound');
+});
+
+// Express identifies error handlers by their four parameters, so `next` must stay
+app.use((err, req, res, next) => {
+  res.status(500).render('pages/serverError');
+});
 // #endregion
 
 module.exports = { app, sessionStore };

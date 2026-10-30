@@ -1,7 +1,27 @@
-<ul data-testid="product-list">
+<%- include('../partials/header') %>
+
+<h1>Products</h1>
+
+<% if (products.length === 0) { %>
+  <p>There are no products yet.</p>
+<% } %>
+
+<ul class="product-grid" data-testid="product-list">
   <% products.forEach(function(product) { %>
-    <li>
-      <%= product.name %>
+    <li class="product-card">
+      <a href="/product/<%= product.id %>">
+        <% if (product.url) { %>
+          <img src="<%= product.url %>" alt="<%= product.name %>" loading="lazy">
+        <% } %>
+        <h2><%= product.name %></h2>
+      </a>
+      <p class="muted"><%= product.description %></p>
+      <p class="price"><%= formatPrice(product.price) %></p>
+      <form method="POST" action="/add-to-cart">
+        <input type="hidden" name="productId" value="<%= product.id %>">
+        <button type="submit">Add to cart</button>
+      </form>
     </li>
     <% }); %>
 </ul>
+<%- include('../partials/footer') %>
