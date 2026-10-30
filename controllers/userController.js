@@ -1,6 +1,7 @@
 const pool = require('../db/pool');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const { deleteUserWithData } = require('../services/userService');
 
 // #region "Register"
 const renderRegisterForm = async (req, res) => {
@@ -162,7 +163,7 @@ const deleteAccount = async (req, res) => {
   const userId = req.user.id;
   const sid = req.sessionID;
 
-  await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+  await deleteUserWithData(userId);
   await pool.query('DELETE FROM session WHERE sid = $1', [sid]);
 
   res.redirect('/login');
@@ -173,12 +174,8 @@ const deleteUser = async (req, res) => {
   const isOwnProfile = requestedId == req.user.id;
   const isAdmin = req.user.isadmin;
 
-  const query = `
-    DELETE FROM users
-    WHERE id = $1`;
-
   if (isAdmin == true || isOwnProfile) {
-    await pool.query(query, [requestedId]);
+    await deleteUserWithData(requestedId);
     res.sendStatus(200);
   } else {
     return res.sendStatus(403);
