@@ -22,7 +22,13 @@ const findOrdersByUser = async (userId) => {
   return rows;
 };
 
+const findOrderById = async (orderId) => {
+  const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+  return rows[0];
+};
+
 module.exports = {
   createOrder,
-  findOrdersByUser
+  findOrdersByUser,
+  findOrderById
 }
