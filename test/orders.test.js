@@ -178,7 +178,7 @@ describe('GET /order-history', () => {
 
     expect(response.status).toBe(200);
     expect(response.text).toContain('data-testid="order-history"');
-    expect(response.text).toContain(`href="/orders/${orderId}"`);
+    expect(response.text).toContain(`href="/order-history/${orderId}"`);
   });
 });
 
