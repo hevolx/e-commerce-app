@@ -18,7 +18,7 @@ const createOrder = async (userId, total, cartItems) => {
 };
 
 const findOrdersByUser = async (userId) => {
-  const { rows } = await pool.query('SELECT * FROM orders WHERE userId = $1', [userId]);
+  const { rows } = await pool.query('SELECT * FROM orders WHERE userId = $1 ORDER BY created DESC', [userId]);
   return rows;
 };
 

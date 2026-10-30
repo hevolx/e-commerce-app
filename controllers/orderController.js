@@ -48,11 +48,11 @@ const renderOrderDetail = async (req, res) => {
   try {
     const order = await findOrderById(req.params.id);
     if (!order) {
-      return res.sendStatus(404);
+      return res.status(404).render('pages/notFound');
     }
 
     if (order.userid !== req.user.id) {
-      return res.sendStatus(403);
+      return res.status(403).render('pages/notFound');
     }
 
     const items = await findOrderItems(order.id);

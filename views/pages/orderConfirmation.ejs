@@ -1,8 +1,12 @@
 <%- include('../partials/header') %>
 
-<section data-testid="order-confirmation">
+<section class="card" data-testid="order-confirmation">
   <h1>Thank you for your order!</h1>
-  <p>Order #<%= orderId %></p>
+  <p>Order #<%= order.id %> &middot; Total: <%= formatPrice(order.total) %></p>
+  <p>
+    <a href="/order-history/<%= order.id %>">View order</a> &middot;
+    <a href="/">Continue shopping</a>
+  </p>
 </section>
 
 <%- include('../partials/footer') %>

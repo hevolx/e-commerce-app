@@ -1,5 +1,13 @@
 <%- include('../partials/header') %>
 
+<h1>Register</h1>
+
+<% if (typeof error !=='undefined' && error) { %>
+  <p data-testid="register-error">
+    <%= error %>
+  </p>
+  <% } %>
+
 <form method="POST" action="/register">
   <label for="email">Email:</label><br>
   <input type="email" id="email" name="email" required><br>
@@ -9,12 +17,8 @@
   <input type="text" id="firstname" name="firstName" required><br>
   <label for="lastname">Lastname:</label><br>
   <input type="text" id="lastname" name="lastName" required><br>
-  <input type="submit" value="Submit">
+  <input type="submit" value="Create account">
 </form>
 
-<% if (typeof error !=='undefined' && error) { %>
-  <p data-testid="register-error">
-    <%= error %>
-  </p>
-  <% } %>
+<p>Already have an account? <a href="/login">Log in</a></p>
 <%- include('../partials/footer') %>

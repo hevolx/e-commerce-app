@@ -27,6 +27,9 @@ const app = express();
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
+// Prices come from DECIMAL columns as strings, so normalise them for display
+app.locals.formatPrice = (price) => `${Number(price).toFixed(2)} kr`;
+
 // Middleware that allows Express to parse through JSON and x-www-form-urlencoded request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

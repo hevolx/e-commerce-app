@@ -1,23 +1,30 @@
 <%- include('../partials/header') %>
 
+<h1>Your cart</h1>
+
+<% if (carts.length === 0) { %>
+  <p>Your cart is empty. <a href="/">Browse products</a></p>
+<% } %>
+
 <ul data-testid="cart-page">
   <% carts.forEach(function(cart) { %>
-    <li>
-      <%= cart.name %>
-      <form method="POST" action="/cart/<%= cartId %>/items/<%= cart.id %>/delete" data-testid="cart-remove-form">
-        <input type="submit" value="Remove">
-      </form>
+    <li class="row">
+      <span>
+        <a href="/product/<%= cart.productid %>"><%= cart.name %></a>
+        <span class="muted">&times; <%= cart.qty %></span>
+      </span>
+      <span class="row-actions">
+        <%= formatPrice(cart.qty * cart.price) %>
+        <form method="POST" action="/cart/<%= cartId %>/items/<%= cart.id %>/delete" data-testid="cart-remove-form">
+          <input type="submit" class="secondary" value="Remove">
+        </form>
+      </span>
     </li>
     <% }); %>
 </ul>
 
-<p>
-  <%= total %>
-</p>
-
-<form method="POST" action="/cart/<%= cartId %>" data-testid="cart-add-form">
-  <label for="productId">Product ID:</label><br>
-  <input type="text" id="productId" name="productId" required><br>
-  <input type="submit" value="Submit">
-</form>
+<% if (carts.length > 0) { %>
+  <p class="total">Total: <%= formatPrice(total) %></p>
+  <p><a class="button" href="/carts/<%= cartId %>/checkout">Go to checkout</a></p>
+<% } %>
 <%- include('../partials/footer') %>

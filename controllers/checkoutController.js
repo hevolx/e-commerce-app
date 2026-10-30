@@ -1,7 +1,8 @@
 const pool = require('../db/pool');
 const { processPayment } = require('../services/paymentService');
-const { findOwnedCart, sumCartItems, emptyCart } = require('../services/cartService');
-const { createOrder } = require('../services/orderService');
+const { findOwnedCart, findCartItems, sumCartItems, emptyCart } = require('../services/cartService');
+const { createOrder, findOrderById } = require('../services/orderService');
+const wantsHtml = require('../utils/wantsHtml');
 
 const checkoutCart = async (req, res) => {
   const cartId = req.params.id;
@@ -22,7 +23,7 @@ const checkoutCart = async (req, res) => {
     const { rows } = await pool.query(query, [cartId]);
     
     if (rows.length === 0) {
-      return res.sendStatus(400);
+      return wantsHtml(req) ? res.redirect(`/carts/${cartId}`) : res.sendStatus(400);
     }
 
     const total = sumCartItems(rows);
@@ -30,6 +31,9 @@ const checkoutCart = async (req, res) => {
     const order = await createOrder(userId, total, rows);
     await emptyCart(cartId);
 
+    if (wantsHtml(req)) {
+      return res.redirect(`/orders/${order.id}/confirmation`);
+    }
     res.status(201).json(order);
   } catch (err) {
     console.log(err);
@@ -37,12 +41,25 @@ const checkoutCart = async (req, res) => {
   }
 }
 
-const renderCheckout = (req, res) => {
-  res.status(200).render('pages/checkout', { cartId: req.params.id });
+const renderCheckout = async (req, res) => {
+  const cartId = req.params.id;
+
+  const cart = await findOwnedCart(cartId, req.user.id);
+  if (!cart) {
+    return res.status(404).render('pages/notFound');
+  }
+
+  const items = await findCartItems(cartId);
+  res.status(200).render('pages/checkout', { cartId, items, total: sumCartItems(items) });
 };
 
-const renderOrderConfirmation = (req, res) => {
-  res.status(200).render('pages/orderConfirmation', { orderId: req.params.id });
+const renderOrderConfirmation = async (req, res) => {
+  const order = await findOrderById(req.params.id);
+  if (!order || order.userid !== req.user.id) {
+    return res.status(404).render('pages/notFound');
+  }
+
+  res.status(200).render('pages/orderConfirmation', { order });
 };
 
 module.exports = {

@@ -1,9 +1,11 @@
 <%- include('../partials/header') %>
 
+<h1>Your account</h1>
+
 <form method="POST" action="/account" data-testid="account-edit-form">
   <label for="firstname">Firstname:</label><br>
   <input type="text" id="firstname" name="firstname" value="<%= user.firstname %>" required><br>
-  <input type="submit" value="Edit">
+  <input type="submit" value="Save">
 </form>
 
 <p data-testid="account-profile">
@@ -13,8 +15,8 @@
 <form method="POST" action="/account/delete" data-testid="account-delete-form">
   <label>
     <input type="checkbox" name="confirmDelete" required>
-    Jag bekräftar att jag vill radera mitt konto
+    I verify that I want to delete my account
   </label><br>
-  <input type="submit" value="Radera konto">
+  <input type="submit" class="danger" value="Delete account">
 </form>
 <%- include('../partials/footer') %>

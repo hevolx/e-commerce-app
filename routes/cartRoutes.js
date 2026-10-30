@@ -84,5 +84,7 @@ router.get('/cart', isAuthenticated, cartController.redirectToCart);
 
 router.get('/carts/:id', isAuthenticated, cartController.renderCart);
 
+router.post('/add-to-cart', isAuthenticated, cartController.addProductToOwnCart);
+
 router.post('/cart/:cartId/items/:itemId/delete', isAuthenticated, cartController.renderRemoveProductFromCartForm);
 module.exports = router;

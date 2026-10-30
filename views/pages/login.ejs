@@ -1,16 +1,20 @@
 <%- include('../partials/header') %>
 
-<form method="POST" action="/login">
-  <label for="email">Email:</label><br>
-  <input type="email" id="email" name="email" required><br>
-  <label for="password">Password:</label><br>
-  <input type="password" id="password" name="password" required><br><br>
-  <input type="submit" value="Submit">
-</form>
+<h1>Log in</h1>
 
 <% if (typeof error !=='undefined' && error) { %>
   <p data-testid="login-error">
     <%= error %>
   </p>
   <% } %>
+
+<form method="POST" action="/login">
+  <label for="email">Email:</label><br>
+  <input type="email" id="email" name="email" required><br>
+  <label for="password">Password:</label><br>
+  <input type="password" id="password" name="password" required><br><br>
+  <input type="submit" value="Log in">
+</form>
+
+<p>No account yet? <a href="/register">Register</a></p>
 <%- include('../partials/footer') %>

@@ -1,7 +1,21 @@
 <%- include('../partials/header') %>
 
+<h1>Checkout</h1>
+
+<ul>
+  <% items.forEach(function(item) { %>
+    <li class="row">
+      <span><%= item.name %> <span class="muted">&times; <%= item.qty %></span></span>
+      <span><%= formatPrice(item.qty * item.price) %></span>
+    </li>
+    <% }); %>
+</ul>
+
+<p class="total">Total: <%= formatPrice(total) %></p>
+
 <form method="POST" action="/cart/<%= cartId %>/checkout" data-testid="checkout-form">
   <input type="submit" value="Place order">
 </form>
+<p><a href="/carts/<%= cartId %>">&larr; Back to cart</a></p>
 
 <%- include('../partials/footer') %>

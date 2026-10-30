@@ -1,5 +1,5 @@
 const pool = require('../db/pool');
-const { findOwnedCart, sumCartItems } = require('../services/cartService');
+const { findOwnedCart, findOrCreateCart, findCartItems, sumCartItems } = require('../services/cartService');
 
 const createCart = async (req, res) => {
   const userId = req.user.id;
@@ -40,6 +40,20 @@ const addProductToCart = async (req, res) => {
   } catch (err) {
     res.sendStatus(500);
   }
+}
+
+const addProductToOwnCart = async (req, res) => {
+  const { productId } = req.body;
+  const cart = await findOrCreateCart(req.user.id);
+
+  await pool.query(
+    `INSERT INTO cartItems (cartId, productId)
+    VALUES ($1, $2)
+    ON CONFLICT (cartId, productId) DO UPDATE SET qty = cartItems.qty + 1`,
+    [cart.id, productId]
+  );
+
+  res.redirect(`/carts/${cart.id}`);
 }
 
 const removeProductFromCart = async (req, res) => {
@@ -98,21 +112,11 @@ const renderCart = async (req, res) => {
   try {
     const cart = await findOwnedCart(cartId, userId);
     if (!cart) {
-      return res.sendStatus(404);
+      return res.status(404).render('pages/notFound');
     }
 
-    const query = `
-      SELECT cartItems.id, cartItems.qty, products.name, products.price
-      FROM cartItems
-      JOIN products ON products.id = cartItems.productId
-      WHERE cartId = $1`;
-
-    const { rows } = await pool.query(query, [cartId]);
-
-    let total = 0;
-    for (let i = 0; i < rows.length; i++) {
-      total += rows[i].qty * rows[i].price;
-    };
+    const rows = await findCartItems(cartId);
+    const total = sumCartItems(rows);
 
     res.status(200).render('pages/cart', { carts: rows, total: total, cartId: cartId });
   } catch (err) {
@@ -122,15 +126,8 @@ const renderCart = async (req, res) => {
 }
 
 const redirectToCart = async (req, res) => {
-  const userId = req.user.id;
-
-  let { rows } = await pool.query('SELECT id FROM carts WHERE userid = $1', [userId]);
-
-  if (rows[0] == null) {
-    ({ rows } = await pool.query('INSERT INTO carts (userId) VALUES ($1) RETURNING id', [userId]));
-  }
-
-  res.redirect(`/carts/${rows[0].id}`);
+  const cart = await findOrCreateCart(req.user.id);
+  res.redirect(`/carts/${cart.id}`);
 }
 
 const renderRemoveProductFromCartForm = async (req, res) => {
@@ -153,6 +150,7 @@ const renderRemoveProductFromCartForm = async (req, res) => {
 module.exports = {
   createCart,
   addProductToCart,
+  addProductToOwnCart,
   removeProductFromCart,
   calculateTotal,
   renderCart,

@@ -9,11 +9,13 @@
 <body>
 <header data-testid="site-header">
   <nav data-testid="site-nav">
-    <a href="/">Home</a>
+    <a href="/" class="brand">E-commerce App</a>
+    <a href="/">Products</a>
     <a href="/cart">Cart</a>
     <% if (user) { %>
       <a href="/account" data-testid="nav-account">Account</a>
       <a href="/order-history" data-testid="nav-order-history">Order history</a>
+      <span class="muted">Hi, <%= user.firstname %></span>
       <form method="POST" action="/logout" data-testid="nav-logout">
         <button type="submit">Log out</button>
       </form>
