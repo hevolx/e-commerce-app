@@ -12,7 +12,13 @@ const getOrders = async (req, res) => {
 
 const getOrder = async (req, res) => {
   try {
-    const order = await findOrderById(req.params.id);
+    // Validate the order ID
+    const orderId = Number(req.params.id);
+    if (!Number.isInteger(orderId) || orderId < 1 || orderId > 2147483647) {
+      return res.sendStatus(400);
+    }
+    const order = await findOrderById(orderId);
+    
     if (!order) {
       return res.sendStatus(404);
     }
