@@ -21,4 +21,12 @@ describe('GET /api-docs', () => {
     expect(response.text).toContain('"/login"');
     expect(response.text).toContain('"/logout"');
   });
+
+  it('documents the product endpoints', async () => {
+    const response = await request(app).get('/api-docs/swagger-ui-init.js');
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('"/products"');
+    expect(response.text).toContain('"/products/{productId}"');
+  });
 });
