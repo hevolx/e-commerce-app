@@ -269,3 +269,56 @@ describe('GET /order-history/:orderId', () => {
     expect(response.text).toContain('data-testid="order-total">25.00<');
   });
 });
+
+describe('GET /order-history/:orderId for another user', () => {
+  const ownerEmail = `order.page.owner.user.${Date.now()}@example.com`;
+  const intruderEmail = `order.page.intruder.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let intruderCookie;
+  let ownerId;
+  let orderId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email: ownerEmail,
+      password,
+      firstName: 'Margot',
+      lastName: 'Shetterly',
+    });
+    await request(app).post('/register').send({
+      email: intruderEmail,
+      password,
+      firstName: 'Jane',
+      lastName: 'Goodall',
+    });
+
+    const loginResponse = await request(app)
+      .post('/login')
+      .send({ email: intruderEmail, password });
+    intruderCookie = loginResponse.headers['set-cookie'].find((c) =>
+      c.startsWith('connect.sid=')
+    );
+
+    const ownerResult = await pool.query('SELECT id FROM users WHERE email = $1', [ownerEmail]);
+    ownerId = ownerResult.rows[0].id;
+
+    const orderResult = await pool.query(
+      'INSERT INTO orders (userId, total, status) VALUES ($1, $2, $3) RETURNING id',
+      [ownerId, 15.0, 'COMPLETE']
+    );
+    orderId = orderResult.rows[0].id;
+  });
+
+  afterAll(async () => {
+    await pool.query('DELETE FROM orders WHERE userId = $1', [ownerId]);
+    await pool.query('DELETE FROM users WHERE email = ANY($1)', [[ownerEmail, intruderEmail]]);
+  });
+
+  it('responds with 403 when the order belongs to another user', async () => {
+    const response = await request(app)
+      .get(`/order-history/${orderId}`)
+      .set('Cookie', intruderCookie);
+
+    expect(response.status).toBe(403);
+  });
+});
