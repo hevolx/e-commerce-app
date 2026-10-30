@@ -30,6 +30,9 @@ app.set('view engine', 'ejs');
 // Middleware that allows Express to parse through JSON and x-www-form-urlencoded request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static assets (CSS, images) from /public
+app.use(express.static(path.join(__dirname, 'public')));
 // #endregion
 
 // #region "SESSION SETUP"
