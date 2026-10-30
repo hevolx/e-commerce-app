@@ -16,4 +16,13 @@ describe('Site header', () => {
     expect(response.text).toContain('href="/"');
     expect(response.text).toContain('href="/cart"');
   });
+
+  it('shows login and register links when the user is logged out', async () => {
+    const response = await request(app).get('/login');
+
+    expect(response.text).toContain('data-testid="nav-login"');
+    expect(response.text).toContain('href="/login"');
+    expect(response.text).toContain('data-testid="nav-register"');
+    expect(response.text).toContain('href="/register"');
+  });
 });
