@@ -1,4 +1,4 @@
-const { findOrdersByUser, findOrderById } = require('../services/orderService');
+const { findOrdersByUser, findOrderById, findOrderItems } = require('../services/orderService');
 
 const getOrders = async (req, res) => {
   try {
@@ -38,8 +38,20 @@ const renderOrderHistory = async (req, res) => {
   }
 }
 
+const renderOrderDetail = async (req, res) => {
+  try {
+    const order = await findOrderById(req.params.id);
+    const items = await findOrderItems(order.id);
+    res.status(200).render('pages/orderDetail', { order, items });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+}
+
 module.exports = {
   getOrders,
   getOrder,
-  renderOrderHistory
+  renderOrderHistory,
+  renderOrderDetail
 }

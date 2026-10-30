@@ -209,3 +209,63 @@ describe('GET /orders/:orderId for a missing order', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('GET /order-history/:orderId', () => {
+  const email = `order.detail.page.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+  let userId;
+  let productId;
+  let orderId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Mary',
+      lastName: 'Winston',
+    });
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+
+    const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    userId = userResult.rows[0].id;
+
+    const productResult = await pool.query(
+      `INSERT INTO products (name, price, description)
+      VALUES ($1, $2, $3)
+      RETURNING id`,
+      ['Order Detail Test Product', 12.5, 'A product used for order detail page testing']
+    );
+    productId = productResult.rows[0].id;
+
+    const orderResult = await pool.query(
+      'INSERT INTO orders (userId, total, status) VALUES ($1, $2, $3) RETURNING id',
+      [userId, 25.0, 'COMPLETE']
+    );
+    orderId = orderResult.rows[0].id;
+
+    await pool.query(
+      'INSERT INTO orderItems (orderId, productId, qty, price) VALUES ($1, $2, $3, $4)',
+      [orderId, productId, 2, 12.5]
+    );
+  });
+
+  afterAll(async () => {
+    await pool.query('DELETE FROM orderItems WHERE orderId = $1', [orderId]);
+    await pool.query('DELETE FROM orders WHERE userId = $1', [userId]);
+    await pool.query('DELETE FROM products WHERE id = $1', [productId]);
+    await pool.query('DELETE FROM users WHERE email = $1', [email]);
+  });
+
+  it("renders the order's products, quantities and total", async () => {
+    const response = await request(app).get(`/order-history/${orderId}`).set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('data-testid="order-detail"');
+    expect(response.text).toContain('Order Detail Test Product');
+    expect(response.text).toContain('data-testid="order-item-qty">2<');
+    expect(response.text).toContain('data-testid="order-total">25.00<');
+  });
+});
