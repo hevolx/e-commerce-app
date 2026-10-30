@@ -1,6 +1,13 @@
 const request = require('supertest');
 const { app, sessionStore } = require('../app');
 
+const fetchSpec = async () => {
+  const response = await request(app).get('/api-docs/swagger-ui-init.js');
+  const options = response.text.match(/var options = (\{[\s\S]*?\n\});/)[1];
+
+  return JSON.parse(options).swaggerDoc;
+};
+
 describe('GET /api-docs', () => {
   afterAll(async () => {
     await sessionStore.close();
@@ -28,5 +35,13 @@ describe('GET /api-docs', () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain('"/products"');
     expect(response.text).toContain('"/products/{productId}"');
+  });
+
+  it('documents the admin product endpoints', async () => {
+    const spec = await fetchSpec();
+
+    expect(spec.paths['/products']).toHaveProperty('post');
+    expect(spec.paths['/products/{productId}']).toHaveProperty('put');
+    expect(spec.paths['/products/{productId}']).toHaveProperty('delete');
   });
 });

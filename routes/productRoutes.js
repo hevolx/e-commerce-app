@@ -21,10 +21,28 @@ router.get('/products', productController.retriveAllProducts);
  */
 router.get('/products/:id', productController.retriveProduct);
 
+/**
+ * @openapi
+ * /products:
+ *   post:
+ *     summary: Create a product (admin)
+ */
 router.post('/products', isAuthenticated, productController.createProduct);
 
+/**
+ * @openapi
+ * /products/{productId}:
+ *   put:
+ *     summary: Update a product (admin)
+ */
 router.put('/products/:id', isAuthenticated, productController.updateProduct);
 
+/**
+ * @openapi
+ * /products/{productId}:
+ *   delete:
+ *     summary: Delete a product (admin)
+ */
 router.delete('/products/:id', isAuthenticated, productController.deleteProduct);
 
 module.exports = router;
