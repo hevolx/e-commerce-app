@@ -93,6 +93,11 @@ app.use('/', orderRoutes);
 app.use((req, res) => {
   res.status(404).render('pages/notFound');
 });
+
+// Express identifies error handlers by their four parameters, so `next` must stay
+app.use((err, req, res, next) => {
+  res.status(500).render('pages/serverError');
+});
 // #endregion
 
 module.exports = { app, sessionStore };
