@@ -80,6 +80,8 @@ router.delete('/cart/:cartId/items/:itemId', isAuthenticated, cartController.rem
  */
 router.get('/cart/:id', isAuthenticated, cartController.calculateTotal);
 
+router.get('/cart', isAuthenticated, cartController.redirectToCart);
+
 router.get('/carts/:id', isAuthenticated, cartController.renderCart);
 
 router.post('/cart/:cartId/items/:itemId/delete', isAuthenticated, cartController.renderRemoveProductFromCartForm);

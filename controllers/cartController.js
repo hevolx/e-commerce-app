@@ -121,6 +121,14 @@ const renderCart = async (req, res) => {
   }
 }
 
+const redirectToCart = async (req, res) => {
+  const userId = req.user.id;
+
+  const { rows } = await pool.query('SELECT id FROM carts WHERE userid = $1', [userId]);
+
+  res.redirect(`/carts/${rows[0].id}`);
+}
+
 const renderRemoveProductFromCartForm = async (req, res) => {
   const { cartId, itemId } = req.params;
   const userId = req.user.id;
@@ -144,5 +152,6 @@ module.exports = {
   removeProductFromCart,
   calculateTotal,
   renderCart,
+  redirectToCart,
   renderRemoveProductFromCartForm
 };
