@@ -9,6 +9,12 @@ router.get('/carts/:id/checkout', isAuthenticated, checkoutController.renderChec
  * /cart/{cartId}/checkout:
  *   post:
  *     summary: Check out the cart and create an order
+ *     parameters:
+ *       - in: path
+ *         name: cartId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       201:
  *         description: Order created

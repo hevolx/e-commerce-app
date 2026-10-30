@@ -21,6 +21,12 @@ router.get('/products', productController.retriveAllProducts);
  * /products/{productId}:
  *   get:
  *     summary: Get a product by id
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Product
@@ -32,6 +38,23 @@ router.get('/products/:id', productController.retriveProduct);
  * /products:
  *   post:
  *     summary: Create a product (admin)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - description
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               description:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Product created
@@ -43,6 +66,29 @@ router.post('/products', isAuthenticated, productController.createProduct);
  * /products/{productId}:
  *   put:
  *     summary: Update a product (admin)
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - description
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               description:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Updated product
@@ -54,6 +100,12 @@ router.put('/products/:id', isAuthenticated, productController.updateProduct);
  * /products/{productId}:
  *   delete:
  *     summary: Delete a product (admin)
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Product deleted

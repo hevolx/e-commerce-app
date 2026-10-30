@@ -62,6 +62,19 @@ describe('GET /api-docs', () => {
     expect(spec.paths['/cart/{cartId}']).toHaveProperty('post');
     expect(spec.paths['/cart/{cartId}/items/{itemId}']).toHaveProperty('delete');
     expect(spec.paths['/cart/{cartId}/checkout']).toHaveProperty('post');
+    expect(spec.paths['/cart/{cartId}/checkout'].post.responses).toHaveProperty('201');
+
+    const requiredPathParams = (path, method) => {
+      const pathItem = spec.paths[path];
+      return [...(pathItem.parameters || []), ...(pathItem[method].parameters || [])]
+        .filter((param) => param.in === 'path' && param.required === true)
+        .map((param) => param.name);
+    };
+
+    expect(requiredPathParams('/cart/{cartId}', 'get')).toEqual(['cartId']);
+    expect(requiredPathParams('/cart/{cartId}', 'post')).toEqual(['cartId']);
+    expect(requiredPathParams('/cart/{cartId}/items/{itemId}', 'delete')).toEqual(['cartId', 'itemId']);
+    expect(requiredPathParams('/cart/{cartId}/checkout', 'post')).toEqual(['cartId']);
   });
 
   it('documents the order endpoints', async () => {

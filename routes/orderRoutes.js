@@ -18,6 +18,12 @@ router.get('/orders', isAuthenticated, orderController.getOrders);
  * /orders/{orderId}:
  *   get:
  *     summary: Get order details
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Order details

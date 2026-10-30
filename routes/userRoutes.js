@@ -9,6 +9,26 @@ const isAuthenticated = require('../middleware/isAuthenticated');
  * /register:
  *   post:
  *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - lastName
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
  *     responses:
  *       201:
  *         description: User created
@@ -23,6 +43,20 @@ router.get('/register', userController.renderRegisterForm);
  * /login:
  *   post:
  *     summary: Log in with username and password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Logged in
@@ -59,6 +93,12 @@ router.get('/users', userController.retriveAllUsers);
  * /users/{userId}:
  *   get:
  *     summary: Get a user profile
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: User profile
@@ -70,6 +110,12 @@ router.get('/users/:id', isAuthenticated, userController.retriveUser);
  * /users/{userId}:
  *   delete:
  *     summary: Delete a user account
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: User deleted
@@ -81,6 +127,12 @@ router.delete('/users/:id', isAuthenticated, userController.deleteUser)
  * /users/{userId}:
  *   put:
  *     summary: Update a user profile
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Updated user profile
