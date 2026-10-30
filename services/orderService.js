@@ -17,6 +17,30 @@ const createOrder = async (userId, total, cartItems) => {
   return order;
 };
 
+const findOrdersByUser = async (userId) => {
+  const { rows } = await pool.query('SELECT * FROM orders WHERE userId = $1', [userId]);
+  return rows;
+};
+
+const findOrderById = async (orderId) => {
+  const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+  return rows[0];
+};
+
+const findOrderItems = async (orderId) => {
+  const query = `
+    SELECT oi.qty, oi.price, p.name
+    FROM orderItems oi
+    JOIN products p ON oi.productId = p.id
+    WHERE oi.orderId = $1
+  `;
+  const { rows } = await pool.query(query, [orderId]);
+  return rows;
+};
+
 module.exports = {
-  createOrder
+  createOrder,
+  findOrdersByUser,
+  findOrderById,
+  findOrderItems
 }

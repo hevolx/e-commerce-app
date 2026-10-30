@@ -1,0 +1,13 @@
+<section data-testid="order-detail">
+  <h1>Order #<%= order.id %></h1>
+  <ul>
+    <% items.forEach(function(item) { %>
+      <li>
+        <%= item.name %>
+        <span data-testid="order-item-qty"><%= item.qty %></span>
+      </li>
+      <% }); %>
+  </ul>
+
+  <p data-testid="order-total"><%= order.total %></p>
+</section>

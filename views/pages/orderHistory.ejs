@@ -1,0 +1,7 @@
+<ul data-testid="order-history">
+  <% orders.forEach(function(order) { %>
+    <li>
+      <a href="/order-history/<%= order.id %>">Order #<%= order.id %></a>
+    </li>
+    <% }); %>
+</ul>
