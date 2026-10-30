@@ -11,6 +11,9 @@ router.get('/product/:id', productController.renderProduct);
  * /products:
  *   get:
  *     summary: List all products
+ *     responses:
+ *       200:
+ *         description: List of products
  */
 router.get('/products', productController.retriveAllProducts);
 /**
@@ -18,6 +21,9 @@ router.get('/products', productController.retriveAllProducts);
  * /products/{productId}:
  *   get:
  *     summary: Get a product by id
+ *     responses:
+ *       200:
+ *         description: Product
  */
 router.get('/products/:id', productController.retriveProduct);
 
@@ -26,6 +32,9 @@ router.get('/products/:id', productController.retriveProduct);
  * /products:
  *   post:
  *     summary: Create a product (admin)
+ *     responses:
+ *       201:
+ *         description: Product created
  */
 router.post('/products', isAuthenticated, productController.createProduct);
 
@@ -34,6 +43,9 @@ router.post('/products', isAuthenticated, productController.createProduct);
  * /products/{productId}:
  *   put:
  *     summary: Update a product (admin)
+ *     responses:
+ *       200:
+ *         description: Updated product
  */
 router.put('/products/:id', isAuthenticated, productController.updateProduct);
 
@@ -42,6 +54,9 @@ router.put('/products/:id', isAuthenticated, productController.updateProduct);
  * /products/{productId}:
  *   delete:
  *     summary: Delete a product (admin)
+ *     responses:
+ *       200:
+ *         description: Product deleted
  */
 router.delete('/products/:id', isAuthenticated, productController.deleteProduct);
 

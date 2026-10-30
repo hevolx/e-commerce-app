@@ -9,6 +9,9 @@ router.get('/carts/:id/checkout', isAuthenticated, checkoutController.renderChec
  * /cart/{cartId}/checkout:
  *   post:
  *     summary: Check out the cart and create an order
+ *     responses:
+ *       201:
+ *         description: Order created
  */
 router.post('/cart/:id/checkout', isAuthenticated, checkoutController.checkoutCart);
 router.get('/orders/:id/confirmation', isAuthenticated, checkoutController.renderOrderConfirmation);

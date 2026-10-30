@@ -70,4 +70,16 @@ describe('GET /api-docs', () => {
     expect(spec.paths['/orders']).toHaveProperty('get');
     expect(spec.paths['/orders/{orderId}']).toHaveProperty('get');
   });
+
+  it('describes the responses of every documented operation', async () => {
+    const spec = await fetchSpec();
+    const operations = Object.entries(spec.paths).flatMap(([path, methods]) =>
+      Object.entries(methods).map(([method, operation]) => ({ path, method, operation }))
+    );
+    const withoutResponses = operations
+      .filter(({ operation }) => !operation.responses || Object.keys(operation.responses).length === 0)
+      .map(({ method, path }) => `${method.toUpperCase()} ${path}`);
+
+    expect(withoutResponses).toEqual([]);
+  });
 });

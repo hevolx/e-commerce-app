@@ -8,6 +8,9 @@ const isAuthenticated = require('../middleware/isAuthenticated');
  * /cart:
  *   post:
  *     summary: Create a cart for the logged-in user
+ *     responses:
+ *       201:
+ *         description: Cart created
  */
 router.post('/cart', isAuthenticated, cartController.createCart);
 /**
@@ -15,6 +18,9 @@ router.post('/cart', isAuthenticated, cartController.createCart);
  * /cart/{cartId}:
  *   post:
  *     summary: Add a product to the cart
+ *     responses:
+ *       201:
+ *         description: Product added to cart
  */
 router.post('/cart/:id', isAuthenticated, cartController.addProductToCart);
 
@@ -23,6 +29,9 @@ router.post('/cart/:id', isAuthenticated, cartController.addProductToCart);
  * /cart/{cartId}/items/{itemId}:
  *   delete:
  *     summary: Remove a product from the cart
+ *     responses:
+ *       200:
+ *         description: Product removed from cart
  */
 router.delete('/cart/:cartId/items/:itemId', isAuthenticated, cartController.removeProductFromCart);
 
@@ -31,6 +40,9 @@ router.delete('/cart/:cartId/items/:itemId', isAuthenticated, cartController.rem
  * /cart/{cartId}:
  *   get:
  *     summary: Get cart contents with total
+ *     responses:
+ *       200:
+ *         description: Cart total
  */
 router.get('/cart/:id', isAuthenticated, cartController.calculateTotal);
 
