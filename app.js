@@ -2,6 +2,8 @@ const express = require('express');
 
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 const dbPool = require('./db/pool');
 
 require('./auth/localStrategy');
@@ -55,6 +57,18 @@ app.use(
 );
 
 app.use(require('./middleware/passportSession'));
+// #endregion
+
+// #region "API DOCS"
+const swaggerSpec = swaggerJsdoc({
+  definition: {
+    openapi: '3.0.0',
+    info: { title: 'E-commerce API', version: '1.0.0' }
+  },
+  apis: ['./routes/*.js']
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // #endregion
 
 // #region "ROUTES"
