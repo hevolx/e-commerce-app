@@ -42,4 +42,41 @@ describe('GET /cart', () => {
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(`/carts/${cartId}`);
   });
+
+  describe('when the user has no cart yet', () => {
+    const newEmail = `cart.redirect.nocart.${Date.now()}@example.com`;
+    let newCookie;
+    let newUserId;
+
+    beforeAll(async () => {
+      await request(app).post('/register').send({
+        email: newEmail,
+        password,
+        firstName: 'Kalpana',
+        lastName: 'Chawla',
+      });
+
+      const loginResponse = await request(app).post('/login').send({ email: newEmail, password });
+      newCookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+
+      const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [newEmail]);
+      newUserId = userResult.rows[0].id;
+    });
+
+    afterAll(async () => {
+      await pool.query('DELETE FROM carts WHERE userid = $1', [newUserId]);
+      await pool.query('DELETE FROM users WHERE email = $1', [newEmail]);
+    });
+
+    it('creates a cart and redirects to it', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const response = await request(app).get('/cart').set('Cookie', newCookie);
+
+      const cartResult = await pool.query('SELECT id FROM carts WHERE userid = $1', [newUserId]);
+      expect(response.status).toBe(302);
+      expect(cartResult.rows).toHaveLength(1);
+      expect(response.headers.location).toBe(`/carts/${cartResult.rows[0].id}`);
+    });
+  });
 });

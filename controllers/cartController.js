@@ -124,7 +124,11 @@ const renderCart = async (req, res) => {
 const redirectToCart = async (req, res) => {
   const userId = req.user.id;
 
-  const { rows } = await pool.query('SELECT id FROM carts WHERE userid = $1', [userId]);
+  let { rows } = await pool.query('SELECT id FROM carts WHERE userid = $1', [userId]);
+
+  if (rows[0] == null) {
+    ({ rows } = await pool.query('INSERT INTO carts (userId) VALUES ($1) RETURNING id', [userId]));
+  }
 
   res.redirect(`/carts/${rows[0].id}`);
 }
