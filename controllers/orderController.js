@@ -13,6 +13,10 @@ const getOrders = async (req, res) => {
 const getOrder = async (req, res) => {
   try {
     const order = await findOrderById(req.params.id);
+    if (!order) {
+      return res.sendStatus(404);
+    }
+
     if (order.userid !== req.user.id) {
       return res.sendStatus(403);
     }

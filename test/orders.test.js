@@ -181,3 +181,31 @@ describe('GET /order-history', () => {
     expect(response.text).toContain(`href="/orders/${orderId}"`);
   });
 });
+
+describe('GET /orders/:orderId for a missing order', () => {
+  const email = `order.missing.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Melba',
+      lastName: 'Roy',
+    });
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+  });
+
+  afterAll(async () => {
+    await pool.query('DELETE FROM users WHERE email = $1', [email]);
+  });
+
+  it('responds with 404 when the order does not exist', async () => {
+    const response = await request(app).get('/orders/999999999').set('Cookie', cookie);
+
+    expect(response.status).toBe(404);
+  });
+});
