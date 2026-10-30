@@ -139,3 +139,45 @@ describe('GET /orders/:orderId for another user', () => {
     expect(response.status).toBe(403);
   });
 });
+
+describe('GET /order-history', () => {
+  const email = `order.history.user.${Date.now()}@example.com`;
+  const password = 'supersecret123';
+  let cookie;
+  let userId;
+  let orderId;
+
+  beforeAll(async () => {
+    await request(app).post('/register').send({
+      email,
+      password,
+      firstName: 'Annie',
+      lastName: 'Easley',
+    });
+
+    const loginResponse = await request(app).post('/login').send({ email, password });
+    cookie = loginResponse.headers['set-cookie'].find((c) => c.startsWith('connect.sid='));
+
+    const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    userId = userResult.rows[0].id;
+
+    const orderResult = await pool.query(
+      'INSERT INTO orders (userId, total, status) VALUES ($1, $2, $3) RETURNING id',
+      [userId, 27.5, 'COMPLETE']
+    );
+    orderId = orderResult.rows[0].id;
+  });
+
+  afterAll(async () => {
+    await pool.query('DELETE FROM orders WHERE userId = $1', [userId]);
+    await pool.query('DELETE FROM users WHERE email = $1', [email]);
+  });
+
+  it('renders the order history with a link to each order', async () => {
+    const response = await request(app).get('/order-history').set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('data-testid="order-history"');
+    expect(response.text).toContain(`href="/orders/${orderId}"`);
+  });
+});
