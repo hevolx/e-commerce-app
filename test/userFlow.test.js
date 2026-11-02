@@ -126,7 +126,16 @@ describe('browser user flow', () => {
     const response = await browserPost(agent, `/cart/${cartId}/checkout`);
 
     expect(response.status).toBe(302);
-    expect(response.headers.location).toMatch(/^\/orders\/\d+\/confirmation$/);
+    const match = response.headers.location.match(/^\/orders\/(\d+)\/confirmation$/);
+    expect(match).not.toBeNull();
+    const orderId = Number(match[1]);
+    expect(response.headers.location).toBe(`/orders/${orderId}/confirmation`);
+
+    const { rows } = await pool.query(
+      'SELECT orders.id FROM orders JOIN users ON users.id = orders.userId WHERE orders.id = $1 AND users.email = $2',
+      [orderId, email]
+    );
+    expect(rows).toHaveLength(1);
   });
 
   it('redirects back to the cart when checking out an empty cart', async () => {

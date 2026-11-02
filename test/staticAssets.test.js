@@ -12,5 +12,6 @@ describe('Static assets', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toMatch(/text\/css/);
+    expect(response.text.length).toBeGreaterThan(0);
   });
 });
