@@ -100,7 +100,9 @@ app.use((req, res) => {
 
 // Express identifies error handlers by their four parameters, so `next` must stay
 app.use((err, req, res, next) => {
-  res.status(500).render('pages/serverError');
+  console.error(err);
+  // Errors can happen before res.locals.user is set, so pass the user explicitly
+  res.status(500).render('pages/serverError', { user: req.user || null });
 });
 // #endregion
 

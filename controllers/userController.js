@@ -9,7 +9,7 @@ const renderRegisterForm = async (req, res) => {
   res.render('pages/register')
 }
 
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
   const { firstName, lastName } = req.body;
   const email = typeof req.body.email === 'string' ? req.body.email.trim() : req.body.email;
   const password = typeof req.body.password === 'string' ? req.body.password.trim() : req.body.password;
@@ -40,7 +40,14 @@ const createUser = async (req, res, next) => {
 
   // Log the new user straight in and send them to the shop
   req.logIn(rows[0], (err) => {
-    if (err) return next(err);
+    if (err) {
+      // The account exists even though the session failed, so send them to log in
+      console.error(err);
+      return res.status(500).render('pages/serverError', {
+        message: 'Your account was created, but we could not log you in. Please log in.',
+        link: { href: '/login', text: 'Log in' }
+      });
+    }
     res.redirect('/');
   });
 };

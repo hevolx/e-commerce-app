@@ -2,6 +2,12 @@
 
 <div data-testid="server-error-page">
   <h1>Something went wrong</h1>
+  <% if (typeof message !== 'undefined' && message) { %>
+    <p data-testid="server-error-message"><%= message %></p>
+  <% } %>
+  <% if (typeof link !== 'undefined' && link) { %>
+    <p><a href="<%= link.href %>"><%= link.text %></a></p>
+  <% } %>
 </div>
 
 <%- include('../partials/footer') %>
