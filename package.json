@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "seed:products": "node db/seedProducts.js",
+    "seed:products": "node db/setupDatabase.js && node db/seedProducts.js",
     "test": "jest --runInBand"
   },
   "keywords": [],

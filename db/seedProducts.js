@@ -23,13 +23,27 @@ const insertProducts = async (products) => {
     WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = $1::VARCHAR)
     RETURNING id`;
 
-  let inserted = 0;
-  for (const { name, price, description, url } of products) {
-    const { rowCount } = await pool.query(query, [name, price, description, url]);
-    inserted += rowCount;
-  }
+  const client = await pool.connect();
 
-  return inserted;
+  try {
+    await client.query('BEGIN');
+    // Serialise concurrent seeds so two runs cannot both insert the same name
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('seed_products'))");
+
+    let inserted = 0;
+    for (const { name, price, description, url } of products) {
+      const { rowCount } = await client.query(query, [name, price, description, url]);
+      inserted += rowCount;
+    }
+
+    await client.query('COMMIT');
+    return inserted;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 };
 
 const fetchProducts = async (limit) => {
