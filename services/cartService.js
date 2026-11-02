@@ -9,10 +9,14 @@ const findOwnedCart = async (cartId, userid) => {
 };
 
 const findOrCreateCart = async (userId) => {
-  let { rows } = await pool.query('SELECT id FROM carts WHERE userid = $1', [userId]);
+  // carts.userId is unique, so concurrent requests cannot create a second cart
+  let { rows } = await pool.query(
+    'INSERT INTO carts (userId) VALUES ($1) ON CONFLICT (userId) DO NOTHING RETURNING id',
+    [userId]
+  );
 
   if (rows[0] == null) {
-    ({ rows } = await pool.query('INSERT INTO carts (userId) VALUES ($1) RETURNING id', [userId]));
+    ({ rows } = await pool.query('SELECT id FROM carts WHERE userid = $1', [userId]));
   }
 
   return rows[0];
@@ -34,8 +38,8 @@ const sumCartItems = (items) => {
   return items.reduce((sum, item) => sum + item.qty * Number(item.price), 0);
 };
 
-const emptyCart = async (cartId) => {
-  await pool.query('DELETE FROM cartItems WHERE cartId = $1', [cartId]);
+const emptyCart = async (cartId, db = pool) => {
+  await db.query('DELETE FROM cartItems WHERE cartId = $1', [cartId]);
 };
 
 module.exports = {

@@ -7,29 +7,39 @@ const wantsHtml = require('../utils/wantsHtml');
 const checkoutCart = async (req, res) => {
   const cartId = req.params.id;
   const userId = req.user.id;
-  
+  const client = await pool.connect();
+
   try {
-    const cart = await findOwnedCart(cartId, userId);
-    if (!cart) {
+    // One transaction with the cart row locked, so concurrent checkouts of the
+    // same cart cannot both turn its items into orders
+    await client.query('BEGIN');
+    const { rows: carts } = await client.query(
+      'SELECT id FROM carts WHERE id = $1 AND userid = $2 FOR UPDATE',
+      [cartId, userId]
+    );
+    if (!carts[0]) {
+      await client.query('ROLLBACK');
       return res.sendStatus(400);
     }
-    
+
     const query = `
       SELECT ci.id AS cartItemId, ci.qty, p.price, p.id AS productId
       FROM cartItems ci
       JOIN products p ON ci.productId = p.id
       WHERE ci.cartId = $1
     `;
-    const { rows } = await pool.query(query, [cartId]);
-    
+    const { rows } = await client.query(query, [cartId]);
+
     if (rows.length === 0) {
+      await client.query('ROLLBACK');
       return wantsHtml(req) ? res.redirect(`/carts/${cartId}`) : res.sendStatus(400);
     }
 
     const total = sumCartItems(rows);
     await processPayment(total);
-    const order = await createOrder(userId, total, rows);
-    await emptyCart(cartId);
+    const order = await createOrder(userId, total, rows, client);
+    await emptyCart(cartId, client);
+    await client.query('COMMIT');
 
     if (wantsHtml(req)) {
       return res.redirect(`/orders/${order.id}/confirmation`);
@@ -37,7 +47,10 @@ const checkoutCart = async (req, res) => {
     res.status(201).json(order);
   } catch (err) {
     console.log(err);
+    await client.query('ROLLBACK');
     res.sendStatus(500);
+  } finally {
+    client.release();
   }
 }
 

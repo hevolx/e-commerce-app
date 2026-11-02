@@ -10,6 +10,8 @@ const deleteUserWithData = async (userId) => {
 
   try {
     await client.query('BEGIN');
+    // Lock the user first so concurrent cart or order inserts wait for the delete
+    await client.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
     await client.query(
       'DELETE FROM cartItems WHERE cartId IN (SELECT id FROM carts WHERE userId = $1)',
       [userId]

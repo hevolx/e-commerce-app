@@ -6,6 +6,7 @@ const createCart = async (req, res) => {
   const query = `
   INSERT INTO carts (userId)
   VALUES ($1)
+  ON CONFLICT (userId) DO NOTHING
   RETURNING *`;
 
   const { rows } = await pool.query(query, [userId]);
