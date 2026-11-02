@@ -21,11 +21,16 @@ const { DB } = require('./config');
       id              INT             PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
       name            VARCHAR(50)     NOT NULL,
       price           DECIMAL(10, 2)  NOT NULL,
-      description     VARCHAR(50)     NOT NULL,
+      description     TEXT            NOT NULL,
       url             VARCHAR(255),
       created         TIMESTAMP NOT NULL DEFAULT NOW(),
       modified        TIMESTAMP NOT NULL DEFAULT NOW()
     );
+  `
+
+  // Databases created before descriptions became TEXT still have VARCHAR(50)
+  const widenProductDescription = `
+    ALTER TABLE products ALTER COLUMN description TYPE TEXT;
   `
 
   const ordersTable = `
@@ -76,6 +81,34 @@ const { DB } = require('./config');
     );
   `
 
+  // Each user has one cart. Older databases may hold duplicates, so move their
+  // items into the user's oldest cart and delete the rest before adding the index
+  const mergeDuplicateCarts = `
+    WITH keepers AS (
+      SELECT id, userId, MIN(id) OVER (PARTITION BY userId) AS keepId
+      FROM carts
+    ),
+    moved AS (
+      INSERT INTO cartItems (cartId, productId, qty)
+      SELECT k.keepId, ci.productId, SUM(ci.qty)
+      FROM cartItems ci
+      JOIN keepers k ON k.id = ci.cartId
+      WHERE k.id <> k.keepId
+      GROUP BY k.keepId, ci.productId
+      ON CONFLICT (cartId, productId) DO UPDATE SET qty = cartItems.qty + EXCLUDED.qty
+    )
+    DELETE FROM cartItems
+    WHERE cartId IN (SELECT id FROM keepers WHERE id <> keepId);
+
+    DELETE FROM carts c
+    USING carts keep
+    WHERE keep.userId = c.userId AND keep.id < c.id;
+  `
+
+  const uniqueCartPerUser = `
+    CREATE UNIQUE INDEX IF NOT EXISTS carts_userid_key ON carts (userId);
+  `
+
   const sessionTable = `
     CREATE TABLE IF NOT EXISTS session (
       sid             VARCHAR       NOT NULL COLLATE "default",
@@ -103,10 +136,13 @@ const { DB } = require('./config');
     // Create tables on database
     await db.query(usersTable);
     await db.query(productsTable);
+    await db.query(widenProductDescription);
     await db.query(ordersTable);
     await db.query(orderItemsTable);
     await db.query(cartsTable);
     await db.query(cartItemsTable);
+    await db.query(mergeDuplicateCarts);
+    await db.query(uniqueCartPerUser);
     await db.query(sessionTable);
     await db.query(sessionExpireIndex);
   } catch (err) {

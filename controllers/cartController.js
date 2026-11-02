@@ -1,11 +1,12 @@
 const pool = require('../db/pool');
-const { findOwnedCart, sumCartItems } = require('../services/cartService');
+const { findOwnedCart, findOrCreateCart, findCartItems, sumCartItems } = require('../services/cartService');
 
 const createCart = async (req, res) => {
   const userId = req.user.id;
   const query = `
   INSERT INTO carts (userId)
   VALUES ($1)
+  ON CONFLICT (userId) DO NOTHING
   RETURNING *`;
 
   const { rows } = await pool.query(query, [userId]);
@@ -40,6 +41,32 @@ const addProductToCart = async (req, res) => {
   } catch (err) {
     res.sendStatus(500);
   }
+}
+
+const addProductToOwnCart = async (req, res) => {
+  const productId = Number(req.body.productId);
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return res.sendStatus(400);
+  }
+
+  const cart = await findOrCreateCart(req.user.id);
+
+  try {
+    await pool.query(
+      `INSERT INTO cartItems (cartId, productId)
+      VALUES ($1, $2)
+      ON CONFLICT (cartId, productId) DO UPDATE SET qty = cartItems.qty + 1`,
+      [cart.id, productId]
+    );
+  } catch (err) {
+    // 23503: foreign key violation, i.e. the product does not exist
+    if (err.code === '23503') {
+      return res.sendStatus(400);
+    }
+    throw err;
+  }
+
+  res.redirect(`/carts/${cart.id}`);
 }
 
 const removeProductFromCart = async (req, res) => {
@@ -98,27 +125,22 @@ const renderCart = async (req, res) => {
   try {
     const cart = await findOwnedCart(cartId, userId);
     if (!cart) {
-      return res.sendStatus(404);
+      return res.status(404).render('pages/notFound');
     }
 
-    const query = `
-      SELECT cartItems.id, cartItems.qty, products.name, products.price
-      FROM cartItems
-      JOIN products ON products.id = cartItems.productId
-      WHERE cartId = $1`;
-
-    const { rows } = await pool.query(query, [cartId]);
-
-    let total = 0;
-    for (let i = 0; i < rows.length; i++) {
-      total += rows[i].qty * rows[i].price;
-    };
+    const rows = await findCartItems(cartId);
+    const total = sumCartItems(rows);
 
     res.status(200).render('pages/cart', { carts: rows, total: total, cartId: cartId });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
   }
+}
+
+const redirectToCart = async (req, res) => {
+  const cart = await findOrCreateCart(req.user.id);
+  res.redirect(`/carts/${cart.id}`);
 }
 
 const renderRemoveProductFromCartForm = async (req, res) => {
@@ -141,8 +163,10 @@ const renderRemoveProductFromCartForm = async (req, res) => {
 module.exports = {
   createCart,
   addProductToCart,
+  addProductToOwnCart,
   removeProductFromCart,
   calculateTotal,
   renderCart,
+  redirectToCart,
   renderRemoveProductFromCartForm
 };

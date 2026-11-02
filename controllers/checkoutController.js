@@ -1,48 +1,78 @@
 const pool = require('../db/pool');
 const { processPayment } = require('../services/paymentService');
-const { findOwnedCart, sumCartItems, emptyCart } = require('../services/cartService');
-const { createOrder } = require('../services/orderService');
+const { findOwnedCart, findCartItems, sumCartItems, emptyCart } = require('../services/cartService');
+const { createOrder, findOrderById } = require('../services/orderService');
+const wantsHtml = require('../utils/wantsHtml');
 
 const checkoutCart = async (req, res) => {
   const cartId = req.params.id;
   const userId = req.user.id;
-  
+  const client = await pool.connect();
+
   try {
-    const cart = await findOwnedCart(cartId, userId);
-    if (!cart) {
+    // One transaction with the cart row locked, so concurrent checkouts of the
+    // same cart cannot both turn its items into orders
+    await client.query('BEGIN');
+    const { rows: carts } = await client.query(
+      'SELECT id FROM carts WHERE id = $1 AND userid = $2 FOR UPDATE',
+      [cartId, userId]
+    );
+    if (!carts[0]) {
+      await client.query('ROLLBACK');
       return res.sendStatus(400);
     }
-    
+
     const query = `
       SELECT ci.id AS cartItemId, ci.qty, p.price, p.id AS productId
       FROM cartItems ci
       JOIN products p ON ci.productId = p.id
       WHERE ci.cartId = $1
     `;
-    const { rows } = await pool.query(query, [cartId]);
-    
+    const { rows } = await client.query(query, [cartId]);
+
     if (rows.length === 0) {
-      return res.sendStatus(400);
+      await client.query('ROLLBACK');
+      return wantsHtml(req) ? res.redirect(`/carts/${cartId}`) : res.sendStatus(400);
     }
 
     const total = sumCartItems(rows);
     await processPayment(total);
-    const order = await createOrder(userId, total, rows);
-    await emptyCart(cartId);
+    const order = await createOrder(userId, total, rows, client);
+    await emptyCart(cartId, client);
+    await client.query('COMMIT');
 
+    if (wantsHtml(req)) {
+      return res.redirect(`/orders/${order.id}/confirmation`);
+    }
     res.status(201).json(order);
   } catch (err) {
     console.log(err);
+    await client.query('ROLLBACK');
     res.sendStatus(500);
+  } finally {
+    client.release();
   }
 }
 
-const renderCheckout = (req, res) => {
-  res.status(200).render('pages/checkout', { cartId: req.params.id });
+const renderCheckout = async (req, res) => {
+  const cartId = req.params.id;
+
+  const cart = await findOwnedCart(cartId, req.user.id);
+  if (!cart) {
+    return res.status(404).render('pages/notFound');
+  }
+
+  const items = await findCartItems(cartId);
+  res.status(200).render('pages/checkout', { cartId, items, total: sumCartItems(items) });
 };
 
-const renderOrderConfirmation = (req, res) => {
-  res.status(200).render('pages/orderConfirmation', { orderId: req.params.id });
+const renderOrderConfirmation = async (req, res) => {
+  const order = await findOrderById(req.params.id);
+  if (!order || order.userid !== req.user.id) {
+    return res.status(404).render('pages/notFound');
+  }
+
+  res.status(200).render('pages/orderConfirmation', { order });
 };
 
 module.exports = {

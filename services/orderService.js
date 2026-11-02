@@ -1,14 +1,15 @@
 const pool = require('../db/pool');
 
-const createOrder = async (userId, total, cartItems) => {
-  const { rows } = await pool.query(
+// Pass a transaction client as `db` to create the order inside that transaction
+const createOrder = async (userId, total, cartItems, db = pool) => {
+  const { rows } = await db.query(
     'INSERT INTO orders (userId, total, status) VALUES ($1, $2, $3) RETURNING id',
     [userId, total, 'COMPLETE']
   );
   const order = rows[0];
 
   for (const item of cartItems) {
-    await pool.query(
+    await db.query(
       'INSERT INTO orderItems (orderId, productId, qty, price) VALUES ($1, $2, $3, $4)',
       [order.id, item.productid, item.qty, item.price]
     );
@@ -18,7 +19,7 @@ const createOrder = async (userId, total, cartItems) => {
 };
 
 const findOrdersByUser = async (userId) => {
-  const { rows } = await pool.query('SELECT * FROM orders WHERE userId = $1', [userId]);
+  const { rows } = await pool.query('SELECT * FROM orders WHERE userId = $1 ORDER BY created DESC', [userId]);
   return rows;
 };
 

@@ -3,7 +3,8 @@ const pool = require('../db/pool');
 const renderAllProducts = async (req, res) => {
   const query = `
     SELECT *
-    FROM products`;
+    FROM products
+    ORDER BY id`;
 
   const { rows } = await pool.query(query);
   res.status(200).render('pages/home', { products: rows });
@@ -18,7 +19,7 @@ const renderProduct = async (req, res) => {
 
   const { rows } = await pool.query(query, [productId]);
   if (rows[0] == null) {
-    return res.sendStatus(404);
+    return res.status(404).render('pages/notFound');
   } else { res.status(200).render('pages/product', { products: rows }) }
 }
 

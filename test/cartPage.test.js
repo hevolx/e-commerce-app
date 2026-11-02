@@ -65,14 +65,6 @@ describe('GET /carts/:id', () => {
     expect(response.text).toContain('10');
   });
 
-  it('renders a form for adding a product to the cart', async () => {
-    const response = await request(app).get(`/carts/${cartId}`).set('Cookie', cookie);
-
-    expect(response.text).toContain('data-testid="cart-add-form"');
-    expect(response.text).toContain(`action="/cart/${cartId}"`);
-    expect(response.text).toContain('name="productId"');
-  });
-
   it('renders a form for removing a product from the cart', async () => {
     const response = await request(app).get(`/carts/${cartId}`).set('Cookie', cookie);
 

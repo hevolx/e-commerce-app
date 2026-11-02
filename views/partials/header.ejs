@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E-commerce App</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header data-testid="site-header">
+  <nav data-testid="site-nav">
+    <a href="/" class="brand">E-commerce App</a>
+    <a href="/">Products</a>
+    <a href="/cart">Cart</a>
+    <% if (user) { %>
+      <a href="/account" data-testid="nav-account">Account</a>
+      <a href="/order-history" data-testid="nav-order-history">Order history</a>
+      <span class="muted">Hi, <%= user.firstname %></span>
+      <form method="POST" action="/logout" data-testid="nav-logout">
+        <button type="submit">Log out</button>
+      </form>
+    <% } else { %>
+      <a href="/login" data-testid="nav-login">Log in</a>
+      <a href="/register" data-testid="nav-register">Register</a>
+    <% } %>
+  </nav>
+</header>
+<main>

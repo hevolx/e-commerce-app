@@ -2,13 +2,24 @@ const isAuthenticated = require('../middleware/isAuthenticated');
 
 describe('isAuthenticated middleware', () => {
   it('responds with 401 and does not call next when there is no session', () => {
-    const req = { isAuthenticated: () => false };
+    const req = { isAuthenticated: () => false, accepts: () => 'json' };
     const res = { sendStatus: jest.fn() };
     const next = jest.fn();
 
     isAuthenticated(req, res, next);
 
     expect(res.sendStatus).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('redirects a browser to /login when there is no session', () => {
+    const req = { isAuthenticated: () => false, accepts: () => 'html' };
+    const res = { redirect: jest.fn() };
+    const next = jest.fn();
+
+    isAuthenticated(req, res, next);
+
+    expect(res.redirect).toHaveBeenCalledWith('/login');
     expect(next).not.toHaveBeenCalled();
   });
 

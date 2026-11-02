@@ -12,6 +12,7 @@ describe('GET /carts/:id/checkout', () => {
   let cookie;
   let userId;
   let cartId;
+  let productId;
 
   beforeAll(async () => {
     await request(app).post('/register').send({
@@ -29,10 +30,21 @@ describe('GET /carts/:id/checkout', () => {
 
     const cartResponse = await request(app).post('/cart').set('Cookie', cookie);
     cartId = cartResponse.body.id;
+
+    const productResult = await pool.query(
+      `INSERT INTO products (name, price, description)
+      VALUES ($1, $2, $3)
+      RETURNING id`,
+      ['Checkout Page Product', 4.5, 'A product used for checkout page testing']
+    );
+    productId = productResult.rows[0].id;
+    await pool.query('INSERT INTO cartItems (cartId, productId) VALUES ($1, $2)', [cartId, productId]);
   });
 
   afterAll(async () => {
+    await pool.query('DELETE FROM cartItems WHERE cartId = $1', [cartId]);
     await pool.query('DELETE FROM carts WHERE userid = $1', [userId]);
+    await pool.query('DELETE FROM products WHERE id = $1', [productId]);
     await pool.query('DELETE FROM users WHERE email = $1', [email]);
   });
 
@@ -42,6 +54,16 @@ describe('GET /carts/:id/checkout', () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain('data-testid="checkout-form"');
     expect(response.text).toContain(`action="/cart/${cartId}/checkout"`);
+  });
+
+  it('shows an empty-cart message instead of the form when the cart is empty', async () => {
+    await pool.query('DELETE FROM cartItems WHERE cartId = $1', [cartId]);
+
+    const response = await request(app).get(`/carts/${cartId}/checkout`).set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('data-testid="checkout-empty"');
+    expect(response.text).not.toContain('data-testid="checkout-form"');
   });
 });
 

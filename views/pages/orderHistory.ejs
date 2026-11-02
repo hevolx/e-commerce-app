@@ -1,7 +1,19 @@
+<%- include('../partials/header') %>
+
+<h1>Order history</h1>
+
+<% if (orders.length === 0) { %>
+  <p>You have no orders yet. <a href="/">Start shopping</a></p>
+<% } %>
+
 <ul data-testid="order-history">
   <% orders.forEach(function(order) { %>
-    <li>
+    <li class="row">
       <a href="/order-history/<%= order.id %>">Order #<%= order.id %></a>
+      <span class="muted"><%= order.created.toISOString().slice(0, 10) %></span>
+      <span><%= formatPrice(order.total) %></span>
     </li>
     <% }); %>
 </ul>
+
+<%- include('../partials/footer') %>

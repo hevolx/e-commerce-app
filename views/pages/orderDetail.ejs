@@ -1,13 +1,22 @@
+<%- include('../partials/header') %>
+
+<p><a href="/order-history">&larr; Order history</a></p>
+
 <section data-testid="order-detail">
   <h1>Order #<%= order.id %></h1>
   <ul>
     <% items.forEach(function(item) { %>
-      <li>
-        <%= item.name %>
-        <span data-testid="order-item-qty"><%= item.qty %></span>
+      <li class="row">
+        <span>
+          <%= item.name %>
+          <span class="muted">&times; <span data-testid="order-item-qty"><%= item.qty %></span></span>
+        </span>
+        <span><%= formatPrice(item.qty * item.price) %></span>
       </li>
       <% }); %>
   </ul>
 
-  <p data-testid="order-total"><%= order.total %></p>
+  <p class="total">Total: $<span data-testid="order-total"><%= order.total %></span></p>
 </section>
+
+<%- include('../partials/footer') %>

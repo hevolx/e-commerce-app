@@ -1,6 +1,8 @@
 const pool = require('../db/pool');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const wantsHtml = require('../utils/wantsHtml');
+const { deleteUserWithData } = require('../services/userService');
 
 // #region "Register"
 const renderRegisterForm = async (req, res) => {
@@ -13,6 +15,9 @@ const createUser = async (req, res) => {
   const password = typeof req.body.password === 'string' ? req.body.password.trim() : req.body.password;
 
   if (!email || !password) {
+    if (wantsHtml(req)) {
+      return res.status(400).render('pages/register', { error: 'Email and password are required.' });
+    }
     return res.status(400).send('Fields marked with * is required');
   }
 
@@ -27,7 +32,24 @@ const createUser = async (req, res) => {
 
   if (rows[0] == null) {
     return res.status(409).render('pages/register', { error: `Email '${email}' already exists.` });
-  } else { res.status(201).send(`User added with ID: ${rows[0].id}`) };
+  }
+
+  if (!wantsHtml(req)) {
+    return res.status(201).send(`User added with ID: ${rows[0].id}`);
+  }
+
+  // Log the new user straight in and send them to the shop
+  req.logIn(rows[0], (err) => {
+    if (err) {
+      // The account exists even though the session failed, so send them to log in
+      console.error(err);
+      return res.status(500).render('pages/serverError', {
+        message: 'Your account was created, but we could not log you in. Please log in.',
+        link: { href: '/login', text: 'Log in' }
+      });
+    }
+    res.redirect('/');
+  });
 };
 // #endregion
 
@@ -51,7 +73,7 @@ const loginUser = async (req, res, next) => {
 
       req.logIn(user, (err) => {
         if (err) return next(err);
-        return res.sendStatus(200);
+        return wantsHtml(req) ? res.redirect('/') : res.sendStatus(200);
       })
     }
   })(req, res, next);
@@ -60,7 +82,8 @@ const loginUser = async (req, res, next) => {
 
 // #region "Logout"
 /**
- * Deletes the current session from the persistent store and responds with 200.
+ * Deletes the current session from the persistent store and responds with 200,
+ * or redirects a browser to the home page.
  *
  * Database errors propagate from the request handler.
  */
@@ -71,7 +94,7 @@ const logoutUser = async (req, res, next) => {
     WHERE sid = $1`;
 
   await pool.query(query, [sid]);
-  res.sendStatus(200);
+  wantsHtml(req) ? res.redirect('/') : res.sendStatus(200);
 }
 // #endregion
 
@@ -162,7 +185,7 @@ const deleteAccount = async (req, res) => {
   const userId = req.user.id;
   const sid = req.sessionID;
 
-  await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+  await deleteUserWithData(userId);
   await pool.query('DELETE FROM session WHERE sid = $1', [sid]);
 
   res.redirect('/login');
@@ -173,12 +196,8 @@ const deleteUser = async (req, res) => {
   const isOwnProfile = requestedId == req.user.id;
   const isAdmin = req.user.isadmin;
 
-  const query = `
-    DELETE FROM users
-    WHERE id = $1`;
-
   if (isAdmin == true || isOwnProfile) {
-    await pool.query(query, [requestedId]);
+    await deleteUserWithData(requestedId);
     res.sendStatus(200);
   } else {
     return res.sendStatus(403);

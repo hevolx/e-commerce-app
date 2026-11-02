@@ -1,7 +1,19 @@
-<ul data-testid="product-detail">
-  <% products.forEach(function(product) { %>
-    <li>
-      <%= product.name %>
-    </li>
-    <% }); %>
-</ul>
+<%- include('../partials/header') %>
+
+<p><a href="/">&larr; All products</a></p>
+
+<% products.forEach(function(product) { %>
+  <section class="card product-detail" data-testid="product-detail">
+    <% if (product.url) { %>
+      <img src="<%= product.url %>" alt="<%= product.name %>">
+    <% } %>
+    <h1><%= product.name %></h1>
+    <p><%= product.description %></p>
+    <p class="price"><%= formatPrice(product.price) %></p>
+    <form method="POST" action="/add-to-cart" data-testid="add-to-cart-form">
+      <input type="hidden" name="productId" value="<%= product.id %>">
+      <button type="submit">Add to cart</button>
+    </form>
+  </section>
+  <% }); %>
+<%- include('../partials/footer') %>
