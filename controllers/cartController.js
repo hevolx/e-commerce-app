@@ -44,15 +44,27 @@ const addProductToCart = async (req, res) => {
 }
 
 const addProductToOwnCart = async (req, res) => {
-  const { productId } = req.body;
+  const productId = Number(req.body.productId);
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return res.sendStatus(400);
+  }
+
   const cart = await findOrCreateCart(req.user.id);
 
-  await pool.query(
-    `INSERT INTO cartItems (cartId, productId)
-    VALUES ($1, $2)
-    ON CONFLICT (cartId, productId) DO UPDATE SET qty = cartItems.qty + 1`,
-    [cart.id, productId]
-  );
+  try {
+    await pool.query(
+      `INSERT INTO cartItems (cartId, productId)
+      VALUES ($1, $2)
+      ON CONFLICT (cartId, productId) DO UPDATE SET qty = cartItems.qty + 1`,
+      [cart.id, productId]
+    );
+  } catch (err) {
+    // 23503: foreign key violation, i.e. the product does not exist
+    if (err.code === '23503') {
+      return res.sendStatus(400);
+    }
+    throw err;
+  }
 
   res.redirect(`/carts/${cart.id}`);
 }

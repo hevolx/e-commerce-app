@@ -93,6 +93,18 @@ describe('browser user flow', () => {
     expect(response.text).toContain('data-testid="not-found-page"');
   });
 
+  it('rejects adding to the cart without a valid product id', async () => {
+    const response = await browserPost(agent, '/add-to-cart').send({ productId: 'abc' });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects adding a product that does not exist to the cart', async () => {
+    const response = await browserPost(agent, '/add-to-cart').send({ productId: 2147483647 });
+
+    expect(response.status).toBe(400);
+  });
+
   it('adds a product to the cart and redirects to the cart page', async () => {
     const response = await browserPost(agent, '/add-to-cart').send({ productId });
 
