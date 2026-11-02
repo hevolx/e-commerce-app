@@ -13,9 +13,13 @@
 
 <p class="total">Total: <%= formatPrice(total) %></p>
 
-<form method="POST" action="/cart/<%= cartId %>/checkout" data-testid="checkout-form">
-  <input type="submit" value="Place order">
-</form>
+<% if (items.length > 0) { %>
+  <form method="POST" action="/cart/<%= cartId %>/checkout" data-testid="checkout-form">
+    <input type="submit" value="Place order">
+  </form>
+<% } else { %>
+  <p class="muted" data-testid="checkout-empty">Your cart is empty.</p>
+<% } %>
 <p><a href="/carts/<%= cartId %>">&larr; Back to cart</a></p>
 
 <%- include('../partials/footer') %>
